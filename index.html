@@ -2,33 +2,49 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>翠翠格斗</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>翠翠格斗 - 嘉人挑战</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            touch-action: none;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            position: fixed;
         }
         
         body {
             font-family: 'Microsoft YaHei', sans-serif;
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-            min-height: 100vh;
-            overflow: hidden;
         }
         
         #gameContainer {
             width: 100%;
+            height: 100%;
             max-width: 1200px;
             margin: 0 auto;
-            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
         }
         
         /* 标题 */
         .game-title {
             text-align: center;
-            font-size: 48px;
+            font-size: clamp(24px, 5vw, 48px);
             font-weight: bold;
             background: linear-gradient(45deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3);
             background-size: 300% 300%;
@@ -37,7 +53,8 @@
             background-clip: text;
             animation: gradientShift 3s ease infinite;
             text-shadow: 0 0 30px rgba(255,255,255,0.3);
-            margin-bottom: 20px;
+            margin-bottom: 10px;
+            flex-shrink: 0;
         }
         
         @keyframes gradientShift {
@@ -50,17 +67,19 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-            padding: 0 50px;
+            margin-bottom: 10px;
+            padding: 0 10px;
+            flex-shrink: 0;
         }
         
         .health-bar-container {
-            width: 400px;
+            flex: 1;
+            max-width: 40%;
         }
         
         .player-name {
             color: #fff;
-            font-size: 20px;
+            font-size: clamp(12px, 3vw, 20px);
             font-weight: bold;
             margin-bottom: 5px;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
@@ -68,11 +87,11 @@
         
         .health-bar {
             width: 100%;
-            height: 30px;
+            height: clamp(20px, 4vw, 30px);
             background: #333;
             border-radius: 15px;
             overflow: hidden;
-            border: 3px solid #fff;
+            border: 2px solid #fff;
             box-shadow: 0 0 20px rgba(255,255,255,0.3);
         }
         
@@ -91,57 +110,59 @@
         }
         
         .vs-text {
-            font-size: 36px;
+            font-size: clamp(20px, 4vw, 36px);
             font-weight: bold;
             color: #feca57;
             text-shadow: 0 0 20px #feca57;
+            margin: 0 10px;
         }
         
         /* 游戏区域 */
         .game-area {
             position: relative;
-            width: 100%;
-            height: 500px;
+            flex: 1;
+            min-height: 300px;
             background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
-            border-radius: 20px;
+            border-radius: 15px;
             overflow: hidden;
             box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            margin-bottom: 10px;
         }
         
         .ground {
             position: absolute;
             bottom: 0;
             width: 100%;
-            height: 80px;
+            height: 15%;
             background: linear-gradient(180deg, #7f8c8d 0%, #2c3e50 100%);
-            border-top: 5px solid #95a5a6;
+            border-top: 3px solid #95a5a6;
         }
         
         /* 角色 */
         .character {
             position: absolute;
-            bottom: 80px;
-            width: 120px;
-            height: 200px;
+            bottom: 15%;
+            width: clamp(80px, 15vw, 120px);
+            height: clamp(133px, 25vw, 200px);
             transition: transform 0.1s ease;
         }
         
         .player1 {
-            left: 150px;
+            left: 15%;
         }
         
         .player2 {
-            right: 150px;
+            right: 15%;
             transform: scaleX(-1);
         }
         
         /* 角色头部 */
         .character-head {
-            width: 80px;
-            height: 80px;
+            width: 66%;
+            height: 40%;
             border-radius: 50%;
             margin: 0 auto;
-            border: 4px solid #fff;
+            border: 3px solid #fff;
             box-shadow: 0 0 20px rgba(255,255,255,0.5);
             overflow: hidden;
             position: relative;
@@ -160,7 +181,7 @@
         
         .player2 .character-head::after {
             content: '嘉';
-            font-size: 40px;
+            font-size: clamp(24px, 6vw, 40px);
             font-weight: bold;
             color: #fff;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
@@ -168,8 +189,8 @@
         
         /* 身体 */
         .character-body {
-            width: 60px;
-            height: 80px;
+            width: 50%;
+            height: 40%;
             margin: 5px auto;
             border-radius: 10px;
             position: relative;
@@ -186,41 +207,41 @@
         /* 手臂 */
         .arm {
             position: absolute;
-            width: 50px;
-            height: 15px;
+            width: 40px;
+            height: 12px;
             background: #f1c40f;
             border-radius: 10px;
-            top: 20px;
+            top: 15px;
             transition: transform 0.1s ease;
         }
         
         .arm.left {
-            left: -40px;
+            left: -30px;
             transform-origin: right center;
         }
         
         .arm.right {
-            right: -40px;
+            right: -30px;
             transform-origin: left center;
         }
         
         /* 腿 */
         .leg {
             position: absolute;
-            width: 20px;
-            height: 60px;
+            width: 16px;
+            height: 50px;
             background: #2c3e50;
             border-radius: 10px;
-            bottom: -50px;
+            bottom: -40px;
             transition: transform 0.1s ease;
         }
         
         .leg.left {
-            left: 10px;
+            left: 8px;
         }
         
         .leg.right {
-            right: 10px;
+            right: 8px;
         }
         
         /* 攻击动画 */
@@ -268,13 +289,13 @@
         }
         
         @keyframes jump {
-            0%, 100% { bottom: 80px; }
-            50% { bottom: 250px; }
+            0%, 100% { bottom: 15%; }
+            50% { bottom: 50%; }
         }
         
         /* 蹲下 */
         .crouching {
-            transform: scaleY(0.6) translateY(80px);
+            transform: scaleY(0.6) translateY(40%);
         }
         
         /* 特效 */
@@ -377,7 +398,7 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 48px;
+            font-size: clamp(32px, 8vw, 48px);
             font-weight: bold;
             color: #feca57;
             text-shadow: 0 0 20px #feca57;
@@ -395,7 +416,7 @@
         /* 伤害数字 */
         .damage-text {
             position: absolute;
-            font-size: 32px;
+            font-size: clamp(24px, 6vw, 32px);
             font-weight: bold;
             color: #e74c3c;
             text-shadow: 2px 2px 4px #000;
@@ -408,55 +429,159 @@
             100% { opacity: 0; transform: translateY(-100px); }
         }
         
-        /* 控制面板 */
-        .controls {
-            margin-top: 20px;
+        /* 击打次数显示 */
+        .hit-counter {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.7);
+            padding: 5px 15px;
+            border-radius: 20px;
+            border: 2px solid #feca57;
+            z-index: 10;
+        }
+        
+        .hit-counter-text {
+            color: #feca57;
+            font-size: clamp(14px, 3vw, 20px);
+            font-weight: bold;
+        }
+        
+        /* 移动端控制区 */
+        .mobile-controls {
+            display: none;
+            flex-shrink: 0;
+            padding: 10px;
+            gap: 20px;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+        
+        /* 方向键 */
+        .d-pad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: 5px;
+            width: 180px;
+            height: 120px;
+        }
+        
+        .d-btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.5);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.1s;
+        }
+        
+        .d-btn:active {
+            background: rgba(255,255,255,0.4);
+            transform: scale(0.95);
+        }
+        
+        .d-btn.up { grid-column: 2; grid-row: 1; }
+        .d-btn.left { grid-column: 1; grid-row: 2; }
+        .d-btn.down { grid-column: 2; grid-row: 2; }
+        .d-btn.right { grid-column: 3; grid-row: 2; }
+        
+        /* 攻击按钮 */
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .action-btn {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: 3px solid #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.1s;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.3);
+        }
+        
+        .action-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 rgba(0,0,0,0.3);
+        }
+        
+        .action-btn.punch {
+            background: linear-gradient(180deg, #e74c3c, #c0392b);
+        }
+        
+        .action-btn.kick {
+            background: linear-gradient(180deg, #f39c12, #e67e22);
+        }
+        
+        .action-btn.throw {
+            background: linear-gradient(180deg, #9b59b6, #8e44ad);
+        }
+        
+        .action-btn .icon {
+            font-size: 24px;
+        }
+        
+        .action-btn .label {
+            font-size: 10px;
+            margin-top: 2px;
+        }
+        
+        /* 桌面端控制说明 */
+        .desktop-controls {
             display: flex;
             justify-content: center;
             gap: 20px;
             flex-wrap: wrap;
+            flex-shrink: 0;
         }
         
         .control-group {
             background: rgba(255,255,255,0.1);
-            padding: 15px 25px;
+            padding: 10px 20px;
             border-radius: 15px;
             border: 2px solid rgba(255,255,255,0.2);
         }
         
         .control-title {
             color: #fff;
-            font-size: 16px;
-            margin-bottom: 10px;
+            font-size: 14px;
+            margin-bottom: 8px;
             text-align: center;
         }
         
         .keys {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             flex-wrap: wrap;
             justify-content: center;
         }
         
         .key {
-            width: 50px;
-            height: 50px;
+            width: 40px;
+            height: 40px;
             background: linear-gradient(180deg, #ecf0f1 0%, #bdc3c7 100%);
-            border-radius: 10px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            font-size: 18px;
+            font-size: 16px;
             color: #2c3e50;
-            box-shadow: 0 5px 0 #7f8c8d;
-            cursor: pointer;
-            user-select: none;
-        }
-        
-        .key:active {
-            transform: translateY(5px);
-            box-shadow: 0 0 0 #7f8c8d;
+            box-shadow: 0 4px 0 #7f8c8d;
         }
         
         /* 开始/结束界面 */
@@ -466,12 +591,13 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.9);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             z-index: 1000;
+            padding: 20px;
         }
         
         .overlay.hidden {
@@ -479,33 +605,35 @@
         }
         
         .overlay-title {
-            font-size: 64px;
+            font-size: clamp(36px, 10vw, 64px);
             font-weight: bold;
             background: linear-gradient(45deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             animation: gradientShift 2s ease infinite;
+            text-align: center;
         }
         
         .overlay-subtitle {
-            font-size: 24px;
+            font-size: clamp(16px, 4vw, 24px);
             color: #fff;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
             text-align: center;
             line-height: 1.6;
         }
         
         .btn {
-            padding: 20px 60px;
-            font-size: 28px;
+            padding: 15px 50px;
+            font-size: clamp(20px, 5vw, 28px);
             font-weight: bold;
             border: none;
             border-radius: 50px;
             cursor: pointer;
             transition: all 0.3s ease;
             text-transform: uppercase;
+            touch-action: manipulation;
         }
         
         .btn-start {
@@ -514,9 +642,8 @@
             box-shadow: 0 0 30px rgba(0,206,201,0.5);
         }
         
-        .btn-start:hover {
-            transform: scale(1.1);
-            box-shadow: 0 0 50px rgba(0,206,201,0.8);
+        .btn-start:active {
+            transform: scale(0.95);
         }
         
         .btn-restart {
@@ -525,27 +652,8 @@
             box-shadow: 0 0 30px rgba(231,76,60,0.5);
         }
         
-        .btn-restart:hover {
-            transform: scale(1.1);
-            box-shadow: 0 0 50px rgba(231,76,60,0.8);
-        }
-        
-        /* 击打次数显示 */
-        .hit-counter {
-            position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0,0,0,0.7);
-            padding: 10px 30px;
-            border-radius: 30px;
-            border: 2px solid #feca57;
-        }
-        
-        .hit-counter-text {
-            color: #feca57;
-            font-size: 24px;
-            font-weight: bold;
+        .btn-restart:active {
+            transform: scale(0.95);
         }
         
         /* 粒子效果 */
@@ -587,9 +695,80 @@
             0% { opacity: 1; }
             100% { opacity: 0; }
         }
+        
+        /* 响应式显示控制 */
+        @media (max-width: 768px) {
+            .desktop-controls {
+                display: none;
+            }
+            
+            .mobile-controls {
+                display: flex;
+            }
+            
+            #gameContainer {
+                padding: 5px;
+            }
+            
+            .game-title {
+                margin-bottom: 5px;
+            }
+            
+            .health-bars {
+                margin-bottom: 5px;
+            }
+        }
+        
+        @media (min-width: 769px) {
+            .mobile-controls {
+                display: none !important;
+            }
+        }
+        
+        /* 横屏提示 */
+        .orientation-tip {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 2000;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .orientation-tip .icon {
+            font-size: 80px;
+            animation: rotatePhone 2s ease infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes rotatePhone {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(90deg); }
+        }
+        
+        @media (max-width: 600px) and (orientation: portrait) {
+            .orientation-tip {
+                display: flex;
+            }
+        }
     </style>
 </head>
 <body>
+    <!-- 横屏提示 -->
+    <div class="orientation-tip" id="orientationTip">
+        <div class="icon">📱</div>
+        <h2>请将手机横屏</h2>
+        <p>为了获得最佳游戏体验，<br>请将手机旋转至横屏模式</p>
+    </div>
+    
     <div id="gameContainer">
         <h1 class="game-title">🥊 翠翠格斗 - 嘉人挑战 🥊</h1>
         
@@ -641,8 +820,8 @@
             <div class="ground"></div>
         </div>
         
-        <!-- 控制说明 -->
-        <div class="controls">
+        <!-- 桌面端控制说明 -->
+        <div class="desktop-controls">
             <div class="control-group">
                 <div class="control-title">🎮 移动</div>
                 <div class="keys">
@@ -661,6 +840,30 @@
                 </div>
             </div>
         </div>
+        
+        <!-- 移动端虚拟按键 -->
+        <div class="mobile-controls" id="mobileControls">
+            <div class="d-pad">
+                <div class="d-btn up" id="btnUp">⬆️</div>
+                <div class="d-btn left" id="btnLeft">⬅️</div>
+                <div class="d-btn down" id="btnDown">⬇️</div>
+                <div class="d-btn right" id="btnRight">➡️</div>
+            </div>
+            <div class="action-buttons">
+                <div class="action-btn punch" id="btnPunch">
+                    <span class="icon">👊</span>
+                    <span class="label">拳</span>
+                </div>
+                <div class="action-btn kick" id="btnKick">
+                    <span class="icon">🦶</span>
+                    <span class="label">腿</span>
+                </div>
+                <div class="action-btn throw" id="btnThrow">
+                    <span class="icon">💪</span>
+                    <span class="label">摔</span>
+                </div>
+            </div>
+        </div>
     </div>
     
     <!-- 开始界面 -->
@@ -668,9 +871,10 @@
         <h1 class="overlay-title">🥊 翠翠格斗 🥊</h1>
         <p class="overlay-subtitle">
             击败嘉人！需要击打 100 次才能获胜！<br>
-            击打越多，特效越炫酷！
+            击打越多，特效越炫酷！<br><br>
+            <span id="controlHint">💻 电脑：方向键移动，A/S/D攻击</span>
         </p>
-        <button class="btn btn-start" onclick="startGame()">开始游戏</button>
+        <button class="btn btn-start" id="startBtn">开始游戏</button>
     </div>
     
     <!-- 游戏结束界面 -->
@@ -680,10 +884,18 @@
             你成功击败了嘉人！<br>
             总击打次数: <span id="finalHits">0</span>
         </p>
-        <button class="btn btn-restart" onclick="restartGame()">再来一局</button>
+        <button class="btn btn-restart" id="restartBtn">再来一局</button>
     </div>
 
     <script>
+        // 检测是否为移动设备
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
+        // 更新控制提示
+        if (isMobile) {
+            document.getElementById('controlHint').textContent = '📱 手机：使用屏幕按钮控制';
+        }
+        
         // 游戏状态
         let gameState = {
             isPlaying: false,
@@ -693,10 +905,11 @@
             targetHits: 100,
             combo: 0,
             lastHitTime: 0,
-            player1Pos: { x: 150, y: 80 },
-            player2Pos: { x: 930, y: 80 },
+            player1Pos: { x: 0, y: 0 },
+            player2Pos: { x: 0, y: 0 },
             isJumping: false,
-            isCrouching: false
+            isCrouching: false,
+            facingRight: true
         };
         
         // DOM 元素
@@ -712,8 +925,19 @@
         const gameOverSubtitle = document.getElementById('gameOverSubtitle');
         const finalHits = document.getElementById('finalHits');
         
-        // 按键状态
-        const keys = {};
+        // 获取游戏区域尺寸
+        function getGameAreaWidth() {
+            return gameArea.clientWidth;
+        }
+        
+        // 初始化位置
+        function initPositions() {
+            const width = getGameAreaWidth();
+            gameState.player1Pos.x = width * 0.15;
+            gameState.player2Pos.x = width * 0.85 - 120;
+            player1.style.left = gameState.player1Pos.x + 'px';
+            player2.style.right = '15%';
+        }
         
         // 开始游戏
         function startGame() {
@@ -722,17 +946,19 @@
             gameState.player2Health = 100;
             gameState.hitCount = 0;
             gameState.combo = 0;
-            gameState.player1Pos = { x: 150, y: 80 };
+            gameState.isJumping = false;
+            gameState.isCrouching = false;
+            gameState.facingRight = true;
             
             updateHealthBars();
             updateHitCount();
+            initPositions();
             
             startScreen.classList.add('hidden');
             gameOverScreen.classList.add('hidden');
             
-            // 重置位置
-            player1.style.left = gameState.player1Pos.x + 'px';
             player1.classList.remove('jumping', 'crouching');
+            player1.style.transform = 'scaleX(1)';
             
             // 启动敌人AI
             startEnemyAI();
@@ -801,7 +1027,7 @@
                 const tx = Math.cos(angle) * velocity;
                 const ty = Math.sin(angle) * velocity;
                 
-                particle.style.animation = `none`;
+                particle.style.animation = 'none';
                 particle.style.transition = 'all 0.5s ease';
                 
                 gameArea.appendChild(particle);
@@ -858,8 +1084,8 @@
             
             // 计算伤害
             let damage = 1;
-            let hitX = gameState.player2Pos.x + 60;
-            let hitY = 200;
+            const hitX = gameState.player2Pos.x + 60;
+            const hitY = gameArea.clientHeight * 0.4;
             
             if (type === 'punch') {
                 damage = 1;
@@ -908,6 +1134,11 @@
             player2.classList.add('hit');
             setTimeout(() => player2.classList.remove('hit'), 300);
             
+            // 震动效果（移动端）
+            if (navigator.vibrate && isMobile) {
+                navigator.vibrate(50);
+            }
+            
             // 更新UI
             updateHealthBars();
             updateHitCount();
@@ -923,15 +1154,17 @@
             if (!gameState.isPlaying) return;
             if (gameState.isJumping) return;
             
-            const speed = 20;
-            const minX = 50;
-            const maxX = 800;
+            const speed = getGameAreaWidth() * 0.03;
+            const minX = 20;
+            const maxX = getGameAreaWidth() - 140;
             
             if (direction === 'left') {
                 gameState.player1Pos.x = Math.max(minX, gameState.player1Pos.x - speed);
+                gameState.facingRight = false;
                 player1.style.transform = 'scaleX(-1)';
             } else if (direction === 'right') {
                 gameState.player1Pos.x = Math.min(maxX, gameState.player1Pos.x + speed);
+                gameState.facingRight = true;
                 player1.style.transform = 'scaleX(1)';
             }
             
@@ -967,7 +1200,6 @@
         function startEnemyAI() {
             if (!gameState.isPlaying) return;
             
-            // 敌人移动
             const moveInterval = setInterval(() => {
                 if (!gameState.isPlaying) {
                     clearInterval(moveInterval);
@@ -975,16 +1207,17 @@
                 }
                 
                 // 向玩家移动
-                if (gameState.player2Pos.x > gameState.player1Pos.x + 200) {
-                    gameState.player2Pos.x -= 5;
-                } else if (gameState.player2Pos.x < gameState.player1Pos.x - 200) {
-                    gameState.player2Pos.x += 5;
+                const distance = gameState.player2Pos.x - gameState.player1Pos.x;
+                if (distance > 200) {
+                    gameState.player2Pos.x -= 3;
+                } else if (distance < -200) {
+                    gameState.player2Pos.x += 3;
                 }
                 
-                player2.style.right = (1200 - gameState.player2Pos.x - 120) + 'px';
+                player2.style.right = (getGameAreaWidth() - gameState.player2Pos.x - 120) + 'px';
                 
                 // 随机攻击
-                if (Math.random() < 0.02 && Math.abs(gameState.player2Pos.x - gameState.player1Pos.x) < 250) {
+                if (Math.random() < 0.02 && Math.abs(distance) < 250) {
                     enemyAttack();
                 }
             }, 50);
@@ -1004,7 +1237,7 @@
                 setTimeout(() => player1.classList.remove('hit'), 300);
                 
                 // 创建小特效
-                createHitEffect(gameState.player1Pos.x + 60, 200, 1);
+                createHitEffect(gameState.player1Pos.x + 60, gameArea.clientHeight * 0.4, 1);
                 
                 if (gameState.player1Health <= 0) {
                     endGame(false);
@@ -1038,27 +1271,17 @@
         document.addEventListener('keydown', (e) => {
             if (!gameState.isPlaying) return;
             
-            keys[e.key] = true;
-            
             switch(e.key) {
                 case 'ArrowLeft':
-                case 'a':
-                case 'A':
                     movePlayer('left');
                     break;
                 case 'ArrowRight':
-                case 'd':
-                case 'D':
                     movePlayer('right');
                     break;
                 case 'ArrowUp':
-                case 'w':
-                case 'W':
                     jump();
                     break;
                 case 'ArrowDown':
-                case 's':
-                case 'S':
                     crouch(true);
                     break;
             }
@@ -1076,19 +1299,135 @@
         });
         
         document.addEventListener('keyup', (e) => {
-            keys[e.key] = false;
-            
-            if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') {
+            if (e.key === 'ArrowDown') {
                 crouch(false);
             }
         });
         
         // 防止方向键滚动页面
         window.addEventListener('keydown', (e) => {
-            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) {
                 e.preventDefault();
             }
         });
+        
+        // 移动端虚拟按键事件
+        function setupMobileControls() {
+            // 方向键
+            const btnUp = document.getElementById('btnUp');
+            const btnDown = document.getElementById('btnDown');
+            const btnLeft = document.getElementById('btnLeft');
+            const btnRight = document.getElementById('btnRight');
+            
+            // 攻击按钮
+            const btnPunch = document.getElementById('btnPunch');
+            const btnKick = document.getElementById('btnKick');
+            const btnThrow = document.getElementById('btnThrow');
+            
+            // 触摸开始
+            btnUp.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                jump();
+            });
+            
+            btnDown.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                crouch(true);
+            });
+            
+            btnDown.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                crouch(false);
+            });
+            
+            btnLeft.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                movePlayer('left');
+            });
+            
+            btnRight.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                movePlayer('right');
+            });
+            
+            btnPunch.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                attack('punch');
+            });
+            
+            btnKick.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                attack('kick');
+            });
+            
+            btnThrow.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                attack('throw');
+            });
+            
+            // 长按连续移动
+            let moveInterval = null;
+            
+            btnLeft.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                moveInterval = setInterval(() => movePlayer('left'), 100);
+            });
+            
+            btnRight.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                moveInterval = setInterval(() => movePlayer('right'), 100);
+            });
+            
+            const clearMove = () => {
+                if (moveInterval) {
+                    clearInterval(moveInterval);
+                    moveInterval = null;
+                }
+            };
+            
+            btnLeft.addEventListener('touchend', clearMove);
+            btnLeft.addEventListener('touchcancel', clearMove);
+            btnRight.addEventListener('touchend', clearMove);
+            btnRight.addEventListener('touchcancel', clearMove);
+        }
+        
+        // 按钮事件
+        document.getElementById('startBtn').addEventListener('click', startGame);
+        document.getElementById('startBtn').addEventListener('touchend', (e) => {
+            e.preventDefault();
+            startGame();
+        });
+        
+        document.getElementById('restartBtn').addEventListener('click', restartGame);
+        document.getElementById('restartBtn').addEventListener('touchend', (e) => {
+            e.preventDefault();
+            restartGame();
+        });
+        
+        // 初始化移动端控制
+        setupMobileControls();
+        
+        // 窗口大小改变时重新计算位置
+        window.addEventListener('resize', () => {
+            if (gameState.isPlaying) {
+                initPositions();
+            }
+        });
+        
+        // 防止双击缩放
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', (e) => {
+            const now = Date.now();
+            if (now - lastTouchEnd <= 300) {
+                e.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+        
+        // 防止页面滚动
+        document.body.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+        }, { passive: false });
     </script>
 </body>
 </html>
