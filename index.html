@@ -6,7 +6,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
     />
-    <title>翠翠格斗 - 嘉人挑战</title>
+    <title>翠翠格斗 - 嘉姐挑战</title>
     <style>
       * {
         margin: 0;
@@ -374,7 +374,7 @@
         box-shadow: 0 0 10px #f39c12;
       }
 
-      /* 武器 - 嘉人的狼牙棒 */
+      /* 武器 - 嘉姐的狼牙棒 */
       .player2 .arm.right .fist::after {
         content: '';
         position: absolute;
@@ -1230,7 +1230,7 @@
         </div>
         <div class="vs-text">VS</div>
         <div class="health-bar-container">
-          <div class="player-name" style="text-align: right">嘉人 👹</div>
+          <div class="player-name" style="text-align: right">嘉姐 👹</div>
           <div class="health-bar">
             <div
               class="health-fill player2-health"
@@ -1266,7 +1266,7 @@
           </div>
         </div>
 
-        <!-- 角色2 - 嘉人 -->
+        <!-- 角色2 - 嘉姐 -->
         <div class="character player2" id="player2">
           <div class="character-head">
             <div class="character-eyes">
@@ -1315,7 +1315,7 @@
     <div class="overlay" id="startScreen">
       <h1 class="overlay-title">🥊 翠翠格斗 🥊</h1>
       <p class="overlay-subtitle">
-        击败嘉人！击打 100 次获胜！<br />
+        击败嘉姐！击打 100 次获胜！<br />
         <small>越打越炫酷！💥</small>
       </p>
       <button class="btn btn-start" id="startBtn">开始游戏</button>
@@ -1401,7 +1401,7 @@
         player1.classList.remove('jumping', 'crouching')
         player1.style.transform = 'scaleX(1)'
 
-        // 启动敌人AI
+        // 启动敌姐AI
         startEnemyAI()
       }
 
@@ -1687,7 +1687,7 @@
         }
       }
 
-      // 敌人AI
+      // 敌姐AI
       function startEnemyAI() {
         if (!gameState.isPlaying) return
 
@@ -1715,7 +1715,7 @@
         }, 50)
       }
 
-      // 敌人攻击
+      // 敌姐攻击
       function enemyAttack() {
         player2.classList.add('punching')
         setTimeout(() => player2.classList.remove('punching'), 200)
@@ -1761,13 +1761,13 @@
             winnerText.style.background =
               'linear-gradient(45deg, #00b894, #00cec9)'
             winnerText.style.webkitBackgroundClip = 'text'
-            gameOverSubtitle.innerHTML = `你成功击败了嘉人！<br>总击打次数: ${gameState.hitCount}`
+            gameOverSubtitle.innerHTML = `你成功击败了嘉姐！<br>总击打次数: ${gameState.hitCount}`
           } else {
             winnerText.textContent = '💀 失败'
             winnerText.style.background =
               'linear-gradient(45deg, #e74c3c, #c0392b)'
             winnerText.style.webkitBackgroundClip = 'text'
-            gameOverSubtitle.innerHTML = `你被嘉人击败了！<br>总击打次数: ${gameState.hitCount}`
+            gameOverSubtitle.innerHTML = `你被嘉姐击败了！<br>总击打次数: ${gameState.hitCount}`
           }
 
           finalHits.textContent = gameState.hitCount
