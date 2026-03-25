@@ -1,1633 +1,1946 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>翠翠格斗 - 嘉姐挑战</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>翠翠格斗 - 嘉人挑战</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            touch-action: none;
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            -khtml-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-        }
-        
-        html, body {
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            position: fixed;
-        }
-        
-        body {
-            font-family: 'Microsoft YaHei', sans-serif;
-            background: linear-gradient(180deg, #1a1a2e 0%, #16213e 30%, #0f3460 70%, #1a1a2e 100%);
-        }
-        
-        #gameContainer {
-            width: 100%;
-            height: 100%;
-            max-width: 600px;
-            margin: 0 auto;
-            display: flex;
-            flex-direction: column;
-            padding: 10px;
-        }
-        
-        /* 标题 */
-        .game-title {
-            text-align: center;
-            font-size: clamp(20px, 5vw, 32px);
-            font-weight: bold;
-            background: linear-gradient(45deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3);
-            background-size: 300% 300%;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            animation: gradientShift 3s ease infinite;
-            text-shadow: 0 0 30px rgba(255,255,255,0.3);
-            margin-bottom: 8px;
-            flex-shrink: 0;
-        }
-        
-        @keyframes gradientShift {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-        }
-        
-        /* 血条区域 */
-        .health-bars {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-            padding: 0 5px;
-            flex-shrink: 0;
-        }
-        
-        .health-bar-container {
-            flex: 1;
-            max-width: 42%;
-        }
-        
-        .player-name {
-            color: #fff;
-            font-size: clamp(11px, 3vw, 14px);
-            font-weight: bold;
-            margin-bottom: 3px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-        }
-        
-        .health-bar {
-            width: 100%;
-            height: clamp(16px, 4vw, 22px);
-            background: #333;
-            border-radius: 12px;
-            overflow: hidden;
-            border: 2px solid #fff;
-            box-shadow: 0 0 15px rgba(255,255,255,0.3);
-        }
-        
-        .health-fill {
-            height: 100%;
-            transition: width 0.3s ease;
-            border-radius: 10px;
-        }
-        
-        .player1-health {
-            background: linear-gradient(90deg, #00b894, #00cec9);
-        }
-        
-        .player2-health {
-            background: linear-gradient(90deg, #e74c3c, #c0392b);
-        }
-        
-        .vs-text {
-            font-size: clamp(16px, 4vw, 24px);
-            font-weight: bold;
-            color: #feca57;
-            text-shadow: 0 0 15px #feca57;
-            margin: 0 8px;
-        }
-        
-        /* 游戏区域 */
-        .game-area {
-            position: relative;
-            flex: 1;
-            min-height: 250px;
-            background: linear-gradient(180deg, #2c3e50 0%, #34495e 50%, #2c3e50 100%);
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 0 30px rgba(0,0,0,0.5), inset 0 0 50px rgba(0,0,0,0.3);
-            margin-bottom: 8px;
-        }
-        
-        .ground {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            height: 12%;
-            background: linear-gradient(180deg, #5a6c7d 0%, #2c3e50 100%);
-            border-top: 3px solid #7f8c8d;
-        }
-        
-        /* 角色 */
-        .character {
-            position: absolute;
-            bottom: 12%;
-            width: clamp(70px, 18vw, 100px);
-            height: clamp(120px, 30vw, 180px);
-            transition: transform 0.1s ease;
-        }
-        
-        .player1 {
-            left: 15%;
-        }
-        
-        .player2 {
-            right: 15%;
-            transform: scaleX(-1);
-        }
-        
-        /* 角色头部 - 更精细的设计 */
-        .character-head {
-            width: 55%;
-            height: 32%;
-            border-radius: 50%;
-            margin: 0 auto;
-            border: 3px solid #fff;
-            box-shadow: 0 0 15px rgba(255,255,255,0.5), inset 0 -5px 10px rgba(0,0,0,0.3);
-            overflow: hidden;
-            position: relative;
-            z-index: 10;
-        }
-        
-        .player1 .character-head {
-            background: url('cuicui.jpg') center/cover;
-        }
-        
-        .player1 .character-head::before {
-            content: '👑';
-            position: absolute;
-            top: -5px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 16px;
-            filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));
-        }
-        
-        .player2 .character-head {
-            background: linear-gradient(135deg, #e74c3c, #8b0000);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .player2 .character-head::before {
-            content: '👹';
-            position: absolute;
-            font-size: clamp(20px, 5vw, 30px);
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
-        }
-        
-        .player2 .character-head::after {
-            content: '';
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at 30% 30%, rgba(255,0,0,0.3), transparent 50%);
-        }
-        
-        /* 眼睛 */
-        .character-eyes {
-            position: absolute;
-            top: 40%;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            gap: 8px;
-        }
-        
-        .eye {
-            width: 8px;
-            height: 8px;
-            background: #fff;
-            border-radius: 50%;
-            position: relative;
-        }
-        
-        .eye::after {
-            content: '';
-            position: absolute;
-            width: 4px;
-            height: 4px;
-            background: #000;
-            border-radius: 50%;
-            top: 2px;
-            left: 2px;
-        }
-        
-        /* 身体 - 更立体的设计 */
-        .character-body {
-            width: 45%;
-            height: 38%;
-            margin: 3px auto;
-            border-radius: 12px;
-            position: relative;
-            box-shadow: inset 0 -8px 15px rgba(0,0,0,0.3);
-        }
-        
-        .player1 .character-body {
-            background: linear-gradient(180deg, #3498db 0%, #2980b9 50%, #1a5276 100%);
-            border: 2px solid #5dade2;
-        }
-        
-        .player1 .character-body::before {
-            content: '翠';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 16px;
-            font-weight: bold;
-            color: rgba(255,255,255,0.8);
-            text-shadow: 0 0 5px rgba(0,0,0,0.5);
-        }
-        
-        .player2 .character-body {
-            background: linear-gradient(180deg, #e74c3c 0%, #c0392b 50%, #922b21 100%);
-            border: 2px solid #ec7063;
-        }
-        
-        .player2 .character-body::before {
-            content: '嘉';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 16px;
-            font-weight: bold;
-            color: rgba(255,255,255,0.8);
-            text-shadow: 0 0 5px rgba(0,0,0,0.5);
-        }
-        
-        /* 装饰 - 腰带 */
-        .belt {
-            position: absolute;
-            bottom: 5px;
-            left: 10%;
-            width: 80%;
-            height: 8px;
-            background: linear-gradient(90deg, #f1c40f, #f39c12, #f1c40f);
-            border-radius: 4px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        }
-        
-        /* 手臂 - 更精细 */
-        .arm {
-            position: absolute;
-            width: 35px;
-            height: 10px;
-            background: linear-gradient(180deg, #f1c40f, #d4ac0d);
-            border-radius: 8px;
-            top: 8px;
-            transition: transform 0.1s ease;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-        }
-        
-        .arm.left {
-            left: -25px;
-            transform-origin: right center;
-        }
-        
-        .arm.right {
-            right: -25px;
-            transform-origin: left center;
-        }
-        
-        /* 拳头 */
-        .fist {
-            position: absolute;
-            width: 14px;
-            height: 14px;
-            background: radial-gradient(circle at 30% 30%, #f5b7b1, #e74c3c);
-            border-radius: 50%;
-            top: -2px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.4);
-        }
-        
-        .arm.left .fist {
-            left: -10px;
-        }
-        
-        .arm.right .fist {
-            right: -10px;
-        }
-        
-        /* 武器 - 翠翠的金箍棒 */
-        .player1 .arm.right .fist::after {
-            content: '';
-            position: absolute;
-            width: 4px;
-            height: 50px;
-            background: linear-gradient(90deg, #f1c40f, #f39c12, #f1c40f);
-            border-radius: 2px;
-            top: -20px;
-            left: 50%;
-            transform: translateX(-50%);
-            box-shadow: 0 0 10px #f39c12;
-        }
-        
-        /* 武器 - 嘉人的狼牙棒 */
-        .player2 .arm.right .fist::after {
-            content: '';
-            position: absolute;
-            width: 6px;
-            height: 45px;
-            background: linear-gradient(90deg, #5d4037, #3e2723, #5d4037);
-            border-radius: 3px;
-            top: -15px;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-        
-        .player2 .arm.right .fist::before {
-            content: '🔺';
-            position: absolute;
-            font-size: 8px;
-            color: #95a5a6;
-            top: -25px;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-        
-        /* 腿 - 更精细 */
-        .leg {
-            position: absolute;
-            width: 14px;
-            height: 45px;
-            background: linear-gradient(90deg, #34495e, #2c3e50, #34495e);
-            border-radius: 8px;
-            bottom: -35px;
-            transition: transform 0.1s ease;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-        }
-        
-        .leg.left {
-            left: 6px;
-        }
-        
-        .leg.right {
-            right: 6px;
-        }
-        
-        /* 鞋子 */
-        .shoe {
-            position: absolute;
-            bottom: -5px;
-            width: 18px;
-            height: 10px;
-            background: linear-gradient(180deg, #e74c3c, #922b21);
-            border-radius: 5px;
-            left: 50%;
-            transform: translateX(-50%);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.4);
-        }
-        
-        .player1 .shoe {
-            background: linear-gradient(180deg, #3498db, #1a5276);
-        }
-        
-        /* 攻击动画 */
-        .punching .arm.right {
-            animation: punch 0.2s ease;
-        }
-        
-        .kicking .leg.right {
-            animation: kick 0.3s ease;
-        }
-        
-        .throwing {
-            animation: throw 0.5s ease;
-        }
-        
-        @keyframes punch {
-            0%, 100% { transform: rotate(0deg); }
-            30% { transform: rotate(-30deg); }
-            50% { transform: rotate(-100deg) translateX(40px); }
-            70% { transform: rotate(-80deg) translateX(30px); }
-        }
-        
-        @keyframes kick {
-            0%, 100% { transform: rotate(0deg); }
-            30% { transform: rotate(-20deg) translateY(-5px); }
-            50% { transform: rotate(-60deg) translateX(50px) translateY(-30px); }
-            70% { transform: rotate(-40deg) translateX(30px) translateY(-15px); }
-        }
-        
-        @keyframes throw {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-20px) rotate(-10deg); }
-            50% { transform: translateX(60px) rotate(15deg); }
-            75% { transform: translateX(40px) rotate(5deg); }
-        }
-        
-        /* 受击动画 - 增强 */
-        .hit {
-            animation: hitShake 0.4s ease;
-        }
-        
-        @keyframes hitShake {
-            0%, 100% { transform: translateX(0) rotate(0deg); filter: brightness(1); }
-            10% { transform: translateX(-15px) rotate(-8deg); filter: brightness(2) saturate(2); }
-            30% { transform: translateX(15px) rotate(8deg); filter: brightness(1.5); }
-            50% { transform: translateX(-10px) rotate(-5deg); filter: brightness(2); }
-            70% { transform: translateX(10px) rotate(5deg); filter: brightness(1.5); }
-            90% { transform: translateX(-5px) rotate(-2deg); filter: brightness(1.2); }
-        }
-        
-        /* 跳跃 */
-        .jumping {
-            animation: jump 0.6s ease;
-        }
-        
-        @keyframes jump {
-            0%, 100% { bottom: 12%; }
-            40% { bottom: 45%; }
-            60% { bottom: 45%; }
-        }
-        
-        /* 蹲下 */
-        .crouching {
-            transform: scaleY(0.65) translateY(35%);
-        }
-        
-        /* 特效基础 */
-        .effect {
-            position: absolute;
-            pointer-events: none;
-            animation: effectFade 0.6s ease forwards;
-        }
-        
-        @keyframes effectFade {
-            0% { opacity: 1; transform: scale(0.3) rotate(0deg); }
-            50% { opacity: 0.8; transform: scale(1.2) rotate(180deg); }
-            100% { opacity: 0; transform: scale(1.8) rotate(360deg); }
-        }
-        
-        /* 击打特效 - 等级1 */
-        .hit-effect-1 {
-            width: 70px;
-            height: 70px;
-        }
-        
-        .hit-effect-1::before {
-            content: '💥';
-            position: absolute;
-            font-size: 40px;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-        
-        /* 击打特效 - 等级2 */
-        .hit-effect-2 {
-            width: 100px;
-            height: 100px;
-        }
-        
-        .hit-effect-2::before {
-            content: '💥💥';
-            position: absolute;
-            font-size: 45px;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-        
-        .hit-effect-2::after {
-            content: '';
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle, transparent 30%, #feca57 50%, transparent 70%);
-            border-radius: 50%;
-            animation: pulseRing 0.5s ease;
-        }
-        
-        /* 击打特效 - 等级3 */
-        .hit-effect-3 {
-            width: 140px;
-            height: 140px;
-        }
-        
-        .hit-effect-3::before {
-            content: '🔥🔥🔥';
-            position: absolute;
-            font-size: 50px;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-        
-        .hit-effect-3::after {
-            content: '';
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle, #fff 0%, #48dbfb 20%, #feca57 40%, #ff6b6b 60%, transparent 70%);
-            border-radius: 50%;
-            animation: explodeRing 0.6s ease;
-        }
-        
-        @keyframes explodeRing {
-            0% { transform: scale(0); opacity: 1; }
-            50% { transform: scale(1.2); opacity: 0.8; }
-            100% { transform: scale(2); opacity: 0; }
-        }
-        
-        /* 击打特效 - 等级4 (终极) */
-        .hit-effect-4 {
-            width: 200px;
-            height: 200px;
-        }
-        
-        .hit-effect-4::before {
-            content: '💥⚡💥';
-            position: absolute;
-            font-size: 60px;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            animation: textShake 0.5s ease infinite;
-        }
-        
-        .hit-effect-4::after {
-            content: '';
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle, #fff 0%, #ff9ff3 10%, #48dbfb 25%, #feca57 40%, #ff6b6b 55%, #5f27cd 70%, transparent 80%);
-            border-radius: 50%;
-            animation: superExplode 0.8s ease;
-        }
-        
-        @keyframes superExplode {
-            0% { transform: scale(0); opacity: 1; }
-            30% { transform: scale(1.5); opacity: 1; }
-            60% { transform: scale(2.5); opacity: 0.6; }
-            100% { transform: scale(4); opacity: 0; }
-        }
-        
-        @keyframes textShake {
-            0%, 100% { transform: translate(-50%, -50%) rotate(-5deg) scale(1); }
-            50% { transform: translate(-50%, -50%) rotate(5deg) scale(1.2); }
-        }
-        
-        @keyframes pulseRing {
-            0% { transform: scale(0.5); opacity: 1; }
-            100% { transform: scale(2); opacity: 0; }
-        }
-        
-        /* 连击数显示 - 增强 */
-        .combo-display {
-            position: absolute;
-            top: 40%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: clamp(36px, 10vw, 56px);
-            font-weight: bold;
-            background: linear-gradient(45deg, #feca57, #ff6b6b, #ff9ff3);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: none;
-            filter: drop-shadow(0 0 20px #feca57);
-            opacity: 0;
-            animation: comboPop 0.8s ease forwards;
-            z-index: 100;
-            white-space: nowrap;
-        }
-        
-        @keyframes comboPop {
-            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.2) rotate(-20deg); }
-            30% { opacity: 1; transform: translate(-50%, -50%) scale(1.4) rotate(10deg); }
-            50% { transform: translate(-50%, -50%) scale(1.2) rotate(-5deg); }
-            100% { opacity: 0; transform: translate(-50%, -50%) scale(1) translateY(-80px) rotate(0deg); }
-        }
-        
-        /* 伤害数字 - 增强 */
-        .damage-text {
-            position: absolute;
-            font-size: clamp(28px, 7vw, 40px);
-            font-weight: bold;
-            background: linear-gradient(180deg, #fff 0%, #ff6b6b 50%, #c0392b 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            filter: drop-shadow(0 0 10px rgba(231,76,60,0.8));
-            animation: damageFloat 1.2s ease forwards;
-            z-index: 100;
-        }
-        
-        .damage-text.critical {
-            font-size: clamp(36px, 9vw, 52px);
-            background: linear-gradient(180deg, #fff720 0%, #f39c12 50%, #e74c3c 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 20px rgba(243,156,18,0.9));
-        }
-        
-        @keyframes damageFloat {
-            0% { opacity: 1; transform: translateY(0) scale(0.5) rotate(-10deg); }
-            20% { transform: translateY(-30px) scale(1.3) rotate(5deg); }
-            40% { transform: translateY(-50px) scale(1.1) rotate(-3deg); }
-            100% { opacity: 0; transform: translateY(-120px) scale(0.8) rotate(0deg); }
-        }
-        
-        /* 击打次数显示 */
-        .hit-counter {
-            position: absolute;
-            top: 8px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0,0,0,0.7);
-            padding: 4px 12px;
-            border-radius: 15px;
-            border: 2px solid #feca57;
-            z-index: 10;
-        }
-        
-        .hit-counter-text {
-            color: #feca57;
-            font-size: clamp(12px, 3vw, 16px);
-            font-weight: bold;
-        }
-        
-        /* 移动端控制区 */
-        .mobile-controls {
-            display: flex;
-            flex-shrink: 0;
-            padding: 5px;
-            gap: 15px;
-            justify-content: space-between;
-            align-items: flex-end;
-        }
-        
-        /* 方向键 */
-        .d-pad {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: repeat(2, 1fr);
-            gap: 4px;
-            width: 150px;
-            height: 100px;
-        }
-        
-        .d-btn {
-            background: rgba(255,255,255,0.15);
-            border: 2px solid rgba(255,255,255,0.4);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            color: #fff;
-            cursor: pointer;
-            transition: all 0.1s;
-        }
-        
-        .d-btn:active {
-            background: rgba(255,255,255,0.35);
-            transform: scale(0.95);
-        }
-        
-        .d-btn.up { grid-column: 2; grid-row: 1; }
-        .d-btn.left { grid-column: 1; grid-row: 2; }
-        .d-btn.down { grid-column: 2; grid-row: 2; }
-        .d-btn.right { grid-column: 3; grid-row: 2; }
-        
-        /* 攻击按钮 */
-        .action-buttons {
-            display: flex;
-            gap: 8px;
-        }
-        
-        .action-btn {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            border: 3px solid #fff;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            font-size: 11px;
-            font-weight: bold;
-            color: #fff;
-            cursor: pointer;
-            transition: all 0.1s;
-            box-shadow: 0 4px 0 rgba(0,0,0,0.3), 0 0 15px rgba(255,255,255,0.2);
-        }
-        
-        .action-btn:active {
-            transform: translateY(4px);
-            box-shadow: 0 0 0 rgba(0,0,0,0.3), 0 0 20px rgba(255,255,255,0.4);
-        }
-        
-        .action-btn.punch {
-            background: linear-gradient(180deg, #ff6b6b, #e74c3c);
-        }
-        
-        .action-btn.kick {
-            background: linear-gradient(180deg, #feca57, #f39c12);
-        }
-        
-        .action-btn.throw {
-            background: linear-gradient(180deg, #a29bfe, #6c5ce7);
-        }
-        
-        .action-btn .icon {
-            font-size: 22px;
-        }
-        
-        .action-btn .label {
-            font-size: 9px;
-            margin-top: 1px;
-        }
-        
-        /* 桌面端控制说明 */
-        .desktop-controls {
-            display: none;
-        }
-        
-        /* 粒子效果 - 增强 */
-        .particle {
-            position: absolute;
-            border-radius: 50%;
-            pointer-events: none;
-        }
-        
-        .particle.star {
-            width: 12px;
-            height: 12px;
-            background: #fff;
-            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
-        }
-        
-        .particle.spark {
-            width: 6px;
-            height: 6px;
-            background: radial-gradient(circle, #fff, #feca57);
-            box-shadow: 0 0 10px #feca57;
-        }
-        
-        /* 冲击波 - 增强 */
-        .shockwave {
-            position: absolute;
-            border: 4px solid rgba(255,255,255,0.9);
-            border-radius: 50%;
-            animation: shockwave 0.8s ease forwards;
-            pointer-events: none;
-        }
-        
-        @keyframes shockwave {
-            0% { width: 0; height: 0; opacity: 1; border-width: 8px; }
-            50% { opacity: 0.6; }
-            100% { width: 400px; height: 400px; opacity: 0; border-width: 0; }
-        }
-        
-        /* 击中闪光 - 增强 */
-        .flash {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            animation: flash 0.15s ease forwards;
-            z-index: 50;
-        }
-        
-        @keyframes flash {
-            0% { background: rgba(255,255,255,0.6); }
-            50% { background: rgba(255,200,100,0.4); }
-            100% { background: rgba(255,100,100,0); }
-        }
-        
-        /* 屏幕震动效果 */
-        .screen-shake {
-            animation: screenShake 0.3s ease;
-        }
-        
-        @keyframes screenShake {
-            0%, 100% { transform: translate(0, 0); }
-            10% { transform: translate(-5px, -5px); }
-            20% { transform: translate(5px, 5px); }
-            30% { transform: translate(-8px, 3px); }
-            40% { transform: translate(8px, -3px); }
-            50% { transform: translate(-3px, 8px); }
-            60% { transform: translate(3px, -8px); }
-            70% { transform: translate(-5px, 5px); }
-            80% { transform: translate(5px, -5px); }
-            90% { transform: translate(-2px, 2px); }
-        }
-        
-        /* 斩击轨迹 */
-        .slash-trail {
-            position: absolute;
-            width: 80px;
-            height: 80px;
-            pointer-events: none;
-            animation: slashFade 0.4s ease forwards;
-        }
-        
-        .slash-trail::before {
-            content: '';
-            position: absolute;
-            width: 100%;
-            height: 4px;
-            background: linear-gradient(90deg, transparent, #fff, #feca57, transparent);
-            top: 50%;
-            left: 0;
-            transform: rotate(-45deg);
-            box-shadow: 0 0 20px #feca57;
-        }
-        
-        @keyframes slashFade {
-            0% { opacity: 1; transform: scale(0.5) rotate(0deg); }
-            100% { opacity: 0; transform: scale(1.5) rotate(45deg); }
-        }
-        
-        /* 开始/结束界面 */
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.92);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            padding: 20px;
-        }
-        
-        .overlay.hidden {
-            display: none;
-        }
-        
-        .overlay-title {
-            font-size: clamp(32px, 10vw, 48px);
-            font-weight: bold;
-            background: linear-gradient(45deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 15px;
-            animation: gradientShift 2s ease infinite;
-            text-align: center;
-        }
-        
-        .overlay-subtitle {
-            font-size: clamp(14px, 4vw, 18px);
-            color: #fff;
-            margin-bottom: 25px;
-            text-align: center;
-            line-height: 1.6;
-        }
-        
-        .btn {
-            padding: 12px 40px;
-            font-size: clamp(18px, 5vw, 24px);
-            font-weight: bold;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            touch-action: manipulation;
-        }
-        
-        .btn-start {
-            background: linear-gradient(45deg, #00b894, #00cec9);
-            color: #fff;
-            box-shadow: 0 0 30px rgba(0,206,201,0.5);
-        }
-        
-        .btn-start:active {
-            transform: scale(0.95);
-        }
-        
-        .btn-restart {
-            background: linear-gradient(45deg, #e74c3c, #c0392b);
-            color: #fff;
-            box-shadow: 0 0 30px rgba(231,76,60,0.5);
-        }
-        
-        .btn-restart:active {
-            transform: scale(0.95);
-        }
-        
-        /* 能量条效果 */
-        .energy-aura {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            animation: energyPulse 1s ease infinite;
-            pointer-events: none;
-        }
-        
-        @keyframes energyPulse {
-            0%, 100% { box-shadow: 0 0 20px #feca57, 0 0 40px #ff6b6b; }
-            50% { box-shadow: 0 0 40px #feca57, 0 0 80px #ff6b6b; }
-        }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        touch-action: none;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        position: fixed;
+      }
+
+      body {
+        font-family: 'Microsoft YaHei', sans-serif;
+        background: linear-gradient(
+          180deg,
+          #1a1a2e 0%,
+          #16213e 30%,
+          #0f3460 70%,
+          #1a1a2e 100%
+        );
+      }
+
+      #gameContainer {
+        width: 100%;
+        height: 100%;
+        max-width: 600px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        padding: 10px;
+      }
+
+      /* 标题 */
+      .game-title {
+        text-align: center;
+        font-size: clamp(20px, 5vw, 32px);
+        font-weight: bold;
+        background: linear-gradient(45deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3);
+        background-size: 300% 300%;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        animation: gradientShift 3s ease infinite;
+        text-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+        margin-bottom: 8px;
+        flex-shrink: 0;
+      }
+
+      @keyframes gradientShift {
+        0%,
+        100% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+      }
+
+      /* 血条区域 */
+      .health-bars {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+        padding: 0 5px;
+        flex-shrink: 0;
+      }
+
+      .health-bar-container {
+        flex: 1;
+        max-width: 42%;
+      }
+
+      .player-name {
+        color: #fff;
+        font-size: clamp(11px, 3vw, 14px);
+        font-weight: bold;
+        margin-bottom: 3px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+      }
+
+      .health-bar {
+        width: 100%;
+        height: clamp(16px, 4vw, 22px);
+        background: #333;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 2px solid #fff;
+        box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+      }
+
+      .health-fill {
+        height: 100%;
+        transition: width 0.3s ease;
+        border-radius: 10px;
+      }
+
+      .player1-health {
+        background: linear-gradient(90deg, #00b894, #00cec9);
+      }
+
+      .player2-health {
+        background: linear-gradient(90deg, #e74c3c, #c0392b);
+      }
+
+      .vs-text {
+        font-size: clamp(16px, 4vw, 24px);
+        font-weight: bold;
+        color: #feca57;
+        text-shadow: 0 0 15px #feca57;
+        margin: 0 8px;
+      }
+
+      /* 游戏区域 */
+      .game-area {
+        position: relative;
+        flex: 1;
+        min-height: 250px;
+        background: linear-gradient(
+          180deg,
+          #2c3e50 0%,
+          #34495e 50%,
+          #2c3e50 100%
+        );
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow:
+          0 0 30px rgba(0, 0, 0, 0.5),
+          inset 0 0 50px rgba(0, 0, 0, 0.3);
+        margin-bottom: 8px;
+      }
+
+      .ground {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        height: 12%;
+        background: linear-gradient(180deg, #5a6c7d 0%, #2c3e50 100%);
+        border-top: 3px solid #7f8c8d;
+      }
+
+      /* 角色 */
+      .character {
+        position: absolute;
+        bottom: 12%;
+        width: clamp(70px, 18vw, 100px);
+        height: clamp(120px, 30vw, 180px);
+        transition: transform 0.1s ease;
+      }
+
+      .player1 {
+        left: 15%;
+      }
+
+      .player2 {
+        right: 15%;
+        transform: scaleX(-1);
+      }
+
+      /* 角色头部 - 更精细的设计 */
+      .character-head {
+        width: 95%;
+        height: 55%;
+        border-radius: 50%;
+        margin: 0 auto;
+        border: 3px solid #fff;
+        box-shadow:
+          0 0 15px rgba(255, 255, 255, 0.5),
+          inset 0 -5px 10px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+        position: relative;
+        z-index: 10;
+      }
+
+      .player1 .character-head {
+        background: url('cuicui.jpg') center/cover;
+      }
+
+      .player2 .character-head {
+        background: linear-gradient(135deg, #e74c3c, #8b0000);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .player2 .character-head::before {
+        content: '👹';
+        position: absolute;
+        font-size: clamp(20px, 5vw, 30px);
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+      }
+
+      .player2 .character-head::after {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(
+          circle at 30% 30%,
+          rgba(255, 0, 0, 0.3),
+          transparent 50%
+        );
+      }
+
+      /* 眼睛 */
+      .character-eyes {
+        position: absolute;
+        top: 45%;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+      }
+
+      .eye {
+        width: 12px;
+        height: 12px;
+        background: #fff;
+        border-radius: 50%;
+        position: relative;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+      }
+
+      .eye::after {
+        content: '';
+        position: absolute;
+        width: 6px;
+        height: 6px;
+        background: #000;
+        border-radius: 50%;
+        top: 3px;
+        left: 3px;
+      }
+
+      /* 身体 - 更立体的设计 */
+      .character-body {
+        width: 45%;
+        height: 38%;
+        margin: 3px auto;
+        border-radius: 12px;
+        position: relative;
+        box-shadow: inset 0 -8px 15px rgba(0, 0, 0, 0.3);
+      }
+
+      .player1 .character-body {
+        background: linear-gradient(
+          180deg,
+          #3498db 0%,
+          #2980b9 50%,
+          #1a5276 100%
+        );
+        border: 2px solid #5dade2;
+      }
+
+      .player1 .character-body::before {
+        content: '翠';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 16px;
+        font-weight: bold;
+        color: rgba(255, 255, 255, 0.8);
+        text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+      }
+
+      .player2 .character-body {
+        background: linear-gradient(
+          180deg,
+          #e74c3c 0%,
+          #c0392b 50%,
+          #922b21 100%
+        );
+        border: 2px solid #ec7063;
+      }
+
+      .player2 .character-body::before {
+        content: '嘉';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 16px;
+        font-weight: bold;
+        color: rgba(255, 255, 255, 0.8);
+        text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+      }
+
+      /* 装饰 - 腰带 */
+      .belt {
+        position: absolute;
+        bottom: 5px;
+        left: 10%;
+        width: 80%;
+        height: 8px;
+        background: linear-gradient(90deg, #f1c40f, #f39c12, #f1c40f);
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      }
+
+      /* 手臂 - 更精细 */
+      .arm {
+        position: absolute;
+        width: 35px;
+        height: 10px;
+        background: linear-gradient(180deg, #f1c40f, #d4ac0d);
+        border-radius: 8px;
+        top: 8px;
+        transition: transform 0.1s ease;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+      }
+
+      .arm.left {
+        left: -25px;
+        transform-origin: right center;
+      }
+
+      .arm.right {
+        right: -25px;
+        transform-origin: left center;
+      }
+
+      /* 拳头 */
+      .fist {
+        position: absolute;
+        width: 14px;
+        height: 14px;
+        background: radial-gradient(circle at 30% 30%, #f5b7b1, #e74c3c);
+        border-radius: 50%;
+        top: -2px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+      }
+
+      .arm.left .fist {
+        left: -10px;
+      }
+
+      .arm.right .fist {
+        right: -10px;
+      }
+
+      /* 武器 - 翠翠的金箍棒 */
+      .player1 .arm.right .fist::after {
+        content: '';
+        position: absolute;
+        width: 4px;
+        height: 50px;
+        background: linear-gradient(90deg, #f1c40f, #f39c12, #f1c40f);
+        border-radius: 2px;
+        top: -20px;
+        left: 50%;
+        transform: translateX(-50%);
+        box-shadow: 0 0 10px #f39c12;
+      }
+
+      /* 武器 - 嘉人的狼牙棒 */
+      .player2 .arm.right .fist::after {
+        content: '';
+        position: absolute;
+        width: 6px;
+        height: 45px;
+        background: linear-gradient(90deg, #5d4037, #3e2723, #5d4037);
+        border-radius: 3px;
+        top: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+
+      .player2 .arm.right .fist::before {
+        content: '🔺';
+        position: absolute;
+        font-size: 8px;
+        color: #95a5a6;
+        top: -25px;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+
+      /* 腿 - 更精细 */
+      .leg {
+        position: absolute;
+        width: 14px;
+        height: 45px;
+        background: linear-gradient(90deg, #34495e, #2c3e50, #34495e);
+        border-radius: 8px;
+        bottom: -35px;
+        transition: transform 0.1s ease;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+      }
+
+      .leg.left {
+        left: 6px;
+      }
+
+      .leg.right {
+        right: 6px;
+      }
+
+      /* 鞋子 */
+      .shoe {
+        position: absolute;
+        bottom: -5px;
+        width: 18px;
+        height: 10px;
+        background: linear-gradient(180deg, #e74c3c, #922b21);
+        border-radius: 5px;
+        left: 50%;
+        transform: translateX(-50%);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+      }
+
+      .player1 .shoe {
+        background: linear-gradient(180deg, #3498db, #1a5276);
+      }
+
+      /* 攻击动画 */
+      .punching .arm.right {
+        animation: punch 0.2s ease;
+      }
+
+      .kicking .leg.right {
+        animation: kick 0.3s ease;
+      }
+
+      .throwing {
+        animation: throw 0.5s ease;
+      }
+
+      @keyframes punch {
+        0%,
+        100% {
+          transform: rotate(0deg);
+        }
+        30% {
+          transform: rotate(-30deg);
+        }
+        50% {
+          transform: rotate(-100deg) translateX(40px);
+        }
+        70% {
+          transform: rotate(-80deg) translateX(30px);
+        }
+      }
+
+      @keyframes kick {
+        0%,
+        100% {
+          transform: rotate(0deg);
+        }
+        30% {
+          transform: rotate(-20deg) translateY(-5px);
+        }
+        50% {
+          transform: rotate(-60deg) translateX(50px) translateY(-30px);
+        }
+        70% {
+          transform: rotate(-40deg) translateX(30px) translateY(-15px);
+        }
+      }
+
+      @keyframes throw {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        25% {
+          transform: translateX(-20px) rotate(-10deg);
+        }
+        50% {
+          transform: translateX(60px) rotate(15deg);
+        }
+        75% {
+          transform: translateX(40px) rotate(5deg);
+        }
+      }
+
+      /* 受击动画 - 增强 */
+      .hit {
+        animation: hitShake 0.4s ease;
+      }
+
+      @keyframes hitShake {
+        0%,
+        100% {
+          transform: translateX(0) rotate(0deg);
+          filter: brightness(1);
+        }
+        10% {
+          transform: translateX(-15px) rotate(-8deg);
+          filter: brightness(2) saturate(2);
+        }
+        30% {
+          transform: translateX(15px) rotate(8deg);
+          filter: brightness(1.5);
+        }
+        50% {
+          transform: translateX(-10px) rotate(-5deg);
+          filter: brightness(2);
+        }
+        70% {
+          transform: translateX(10px) rotate(5deg);
+          filter: brightness(1.5);
+        }
+        90% {
+          transform: translateX(-5px) rotate(-2deg);
+          filter: brightness(1.2);
+        }
+      }
+
+      /* 跳跃 */
+      .jumping {
+        animation: jump 0.6s ease;
+      }
+
+      @keyframes jump {
+        0%,
+        100% {
+          bottom: 12%;
+        }
+        40% {
+          bottom: 45%;
+        }
+        60% {
+          bottom: 45%;
+        }
+      }
+
+      /* 蹲下 */
+      .crouching {
+        transform: scaleY(0.65) translateY(35%);
+      }
+
+      /* 特效基础 */
+      .effect {
+        position: absolute;
+        pointer-events: none;
+        animation: effectFade 0.6s ease forwards;
+      }
+
+      @keyframes effectFade {
+        0% {
+          opacity: 1;
+          transform: scale(0.3) rotate(0deg);
+        }
+        50% {
+          opacity: 0.8;
+          transform: scale(1.2) rotate(180deg);
+        }
+        100% {
+          opacity: 0;
+          transform: scale(1.8) rotate(360deg);
+        }
+      }
+
+      /* 击打特效 - 等级1 */
+      .hit-effect-1 {
+        width: 70px;
+        height: 70px;
+      }
+
+      .hit-effect-1::before {
+        content: '💥';
+        position: absolute;
+        font-size: 40px;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+
+      /* 击打特效 - 等级2 */
+      .hit-effect-2 {
+        width: 100px;
+        height: 100px;
+      }
+
+      .hit-effect-2::before {
+        content: '💥💥';
+        position: absolute;
+        font-size: 45px;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+
+      .hit-effect-2::after {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(
+          circle,
+          transparent 30%,
+          #feca57 50%,
+          transparent 70%
+        );
+        border-radius: 50%;
+        animation: pulseRing 0.5s ease;
+      }
+
+      /* 击打特效 - 等级3 */
+      .hit-effect-3 {
+        width: 140px;
+        height: 140px;
+      }
+
+      .hit-effect-3::before {
+        content: '🔥🔥🔥';
+        position: absolute;
+        font-size: 50px;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+
+      .hit-effect-3::after {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(
+          circle,
+          #fff 0%,
+          #48dbfb 20%,
+          #feca57 40%,
+          #ff6b6b 60%,
+          transparent 70%
+        );
+        border-radius: 50%;
+        animation: explodeRing 0.6s ease;
+      }
+
+      @keyframes explodeRing {
+        0% {
+          transform: scale(0);
+          opacity: 1;
+        }
+        50% {
+          transform: scale(1.2);
+          opacity: 0.8;
+        }
+        100% {
+          transform: scale(2);
+          opacity: 0;
+        }
+      }
+
+      /* 击打特效 - 等级4 (终极) */
+      .hit-effect-4 {
+        width: 200px;
+        height: 200px;
+      }
+
+      .hit-effect-4::before {
+        content: '💥⚡💥';
+        position: absolute;
+        font-size: 60px;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        animation: textShake 0.5s ease infinite;
+      }
+
+      .hit-effect-4::after {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(
+          circle,
+          #fff 0%,
+          #ff9ff3 10%,
+          #48dbfb 25%,
+          #feca57 40%,
+          #ff6b6b 55%,
+          #5f27cd 70%,
+          transparent 80%
+        );
+        border-radius: 50%;
+        animation: superExplode 0.8s ease;
+      }
+
+      @keyframes superExplode {
+        0% {
+          transform: scale(0);
+          opacity: 1;
+        }
+        30% {
+          transform: scale(1.5);
+          opacity: 1;
+        }
+        60% {
+          transform: scale(2.5);
+          opacity: 0.6;
+        }
+        100% {
+          transform: scale(4);
+          opacity: 0;
+        }
+      }
+
+      @keyframes textShake {
+        0%,
+        100% {
+          transform: translate(-50%, -50%) rotate(-5deg) scale(1);
+        }
+        50% {
+          transform: translate(-50%, -50%) rotate(5deg) scale(1.2);
+        }
+      }
+
+      @keyframes pulseRing {
+        0% {
+          transform: scale(0.5);
+          opacity: 1;
+        }
+        100% {
+          transform: scale(2);
+          opacity: 0;
+        }
+      }
+
+      /* 连击数显示 - 增强 */
+      .combo-display {
+        position: absolute;
+        top: 40%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: clamp(36px, 10vw, 56px);
+        font-weight: bold;
+        background: linear-gradient(45deg, #feca57, #ff6b6b, #ff9ff3);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-shadow: none;
+        filter: drop-shadow(0 0 20px #feca57);
+        opacity: 0;
+        animation: comboPop 0.8s ease forwards;
+        z-index: 100;
+        white-space: nowrap;
+      }
+
+      @keyframes comboPop {
+        0% {
+          opacity: 0;
+          transform: translate(-50%, -50%) scale(0.2) rotate(-20deg);
+        }
+        30% {
+          opacity: 1;
+          transform: translate(-50%, -50%) scale(1.4) rotate(10deg);
+        }
+        50% {
+          transform: translate(-50%, -50%) scale(1.2) rotate(-5deg);
+        }
+        100% {
+          opacity: 0;
+          transform: translate(-50%, -50%) scale(1) translateY(-80px)
+            rotate(0deg);
+        }
+      }
+
+      /* 伤害数字 - 增强 */
+      .damage-text {
+        position: absolute;
+        font-size: clamp(28px, 7vw, 40px);
+        font-weight: bold;
+        background: linear-gradient(180deg, #fff 0%, #ff6b6b 50%, #c0392b 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        filter: drop-shadow(0 0 10px rgba(231, 76, 60, 0.8));
+        animation: damageFloat 1.2s ease forwards;
+        z-index: 100;
+      }
+
+      .damage-text.critical {
+        font-size: clamp(36px, 9vw, 52px);
+        background: linear-gradient(
+          180deg,
+          #fff720 0%,
+          #f39c12 50%,
+          #e74c3c 100%
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        filter: drop-shadow(0 0 20px rgba(243, 156, 18, 0.9));
+      }
+
+      @keyframes damageFloat {
+        0% {
+          opacity: 1;
+          transform: translateY(0) scale(0.5) rotate(-10deg);
+        }
+        20% {
+          transform: translateY(-30px) scale(1.3) rotate(5deg);
+        }
+        40% {
+          transform: translateY(-50px) scale(1.1) rotate(-3deg);
+        }
+        100% {
+          opacity: 0;
+          transform: translateY(-120px) scale(0.8) rotate(0deg);
+        }
+      }
+
+      /* 击打次数显示 */
+      .hit-counter {
+        position: absolute;
+        top: 8px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0, 0, 0, 0.7);
+        padding: 4px 12px;
+        border-radius: 15px;
+        border: 2px solid #feca57;
+        z-index: 10;
+      }
+
+      .hit-counter-text {
+        color: #feca57;
+        font-size: clamp(12px, 3vw, 16px);
+        font-weight: bold;
+      }
+
+      /* 移动端控制区 */
+      .mobile-controls {
+        display: flex;
+        flex-shrink: 0;
+        padding: 5px;
+        gap: 15px;
+        justify-content: space-between;
+        align-items: flex-end;
+      }
+
+      /* 方向键 */
+      .d-pad {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: repeat(2, 1fr);
+        gap: 4px;
+        width: 150px;
+        height: 100px;
+      }
+
+      .d-btn {
+        background: rgba(255, 255, 255, 0.15);
+        border: 2px solid rgba(255, 255, 255, 0.4);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        color: #fff;
+        cursor: pointer;
+        transition: all 0.1s;
+      }
+
+      .d-btn:active {
+        background: rgba(255, 255, 255, 0.35);
+        transform: scale(0.95);
+      }
+
+      .d-btn.up {
+        grid-column: 2;
+        grid-row: 1;
+      }
+      .d-btn.left {
+        grid-column: 1;
+        grid-row: 2;
+      }
+      .d-btn.down {
+        grid-column: 2;
+        grid-row: 2;
+      }
+      .d-btn.right {
+        grid-column: 3;
+        grid-row: 2;
+      }
+
+      /* 攻击按钮 */
+      .action-buttons {
+        display: flex;
+        gap: 8px;
+      }
+
+      .action-btn {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        border: 3px solid #fff;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: bold;
+        color: #fff;
+        cursor: pointer;
+        transition: all 0.1s;
+        box-shadow:
+          0 4px 0 rgba(0, 0, 0, 0.3),
+          0 0 15px rgba(255, 255, 255, 0.2);
+      }
+
+      .action-btn:active {
+        transform: translateY(4px);
+        box-shadow:
+          0 0 0 rgba(0, 0, 0, 0.3),
+          0 0 20px rgba(255, 255, 255, 0.4);
+      }
+
+      .action-btn.punch {
+        background: linear-gradient(180deg, #ff6b6b, #e74c3c);
+      }
+
+      .action-btn.kick {
+        background: linear-gradient(180deg, #feca57, #f39c12);
+      }
+
+      .action-btn.throw {
+        background: linear-gradient(180deg, #a29bfe, #6c5ce7);
+      }
+
+      .action-btn .icon {
+        font-size: 22px;
+      }
+
+      .action-btn .label {
+        font-size: 9px;
+        margin-top: 1px;
+      }
+
+      /* 桌面端控制说明 */
+      .desktop-controls {
+        display: none;
+      }
+
+      /* 粒子效果 - 增强 */
+      .particle {
+        position: absolute;
+        border-radius: 50%;
+        pointer-events: none;
+      }
+
+      .particle.star {
+        width: 12px;
+        height: 12px;
+        background: #fff;
+        clip-path: polygon(
+          50% 0%,
+          61% 35%,
+          98% 35%,
+          68% 57%,
+          79% 91%,
+          50% 70%,
+          21% 91%,
+          32% 57%,
+          2% 35%,
+          39% 35%
+        );
+      }
+
+      .particle.spark {
+        width: 6px;
+        height: 6px;
+        background: radial-gradient(circle, #fff, #feca57);
+        box-shadow: 0 0 10px #feca57;
+      }
+
+      /* 冲击波 - 增强 */
+      .shockwave {
+        position: absolute;
+        border: 4px solid rgba(255, 255, 255, 0.9);
+        border-radius: 50%;
+        animation: shockwave 0.8s ease forwards;
+        pointer-events: none;
+      }
+
+      @keyframes shockwave {
+        0% {
+          width: 0;
+          height: 0;
+          opacity: 1;
+          border-width: 8px;
+        }
+        50% {
+          opacity: 0.6;
+        }
+        100% {
+          width: 400px;
+          height: 400px;
+          opacity: 0;
+          border-width: 0;
+        }
+      }
+
+      /* 击中闪光 - 增强 */
+      .flash {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        animation: flash 0.15s ease forwards;
+        z-index: 50;
+      }
+
+      @keyframes flash {
+        0% {
+          background: rgba(255, 255, 255, 0.6);
+        }
+        50% {
+          background: rgba(255, 200, 100, 0.4);
+        }
+        100% {
+          background: rgba(255, 100, 100, 0);
+        }
+      }
+
+      /* 屏幕震动效果 */
+      .screen-shake {
+        animation: screenShake 0.3s ease;
+      }
+
+      @keyframes screenShake {
+        0%,
+        100% {
+          transform: translate(0, 0);
+        }
+        10% {
+          transform: translate(-5px, -5px);
+        }
+        20% {
+          transform: translate(5px, 5px);
+        }
+        30% {
+          transform: translate(-8px, 3px);
+        }
+        40% {
+          transform: translate(8px, -3px);
+        }
+        50% {
+          transform: translate(-3px, 8px);
+        }
+        60% {
+          transform: translate(3px, -8px);
+        }
+        70% {
+          transform: translate(-5px, 5px);
+        }
+        80% {
+          transform: translate(5px, -5px);
+        }
+        90% {
+          transform: translate(-2px, 2px);
+        }
+      }
+
+      /* 斩击轨迹 */
+      .slash-trail {
+        position: absolute;
+        width: 80px;
+        height: 80px;
+        pointer-events: none;
+        animation: slashFade 0.4s ease forwards;
+      }
+
+      .slash-trail::before {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          #fff,
+          #feca57,
+          transparent
+        );
+        top: 50%;
+        left: 0;
+        transform: rotate(-45deg);
+        box-shadow: 0 0 20px #feca57;
+      }
+
+      @keyframes slashFade {
+        0% {
+          opacity: 1;
+          transform: scale(0.5) rotate(0deg);
+        }
+        100% {
+          opacity: 0;
+          transform: scale(1.5) rotate(45deg);
+        }
+      }
+
+      /* 开始/结束界面 */
+      .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.92);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        padding: 20px;
+      }
+
+      .overlay.hidden {
+        display: none;
+      }
+
+      .overlay-title {
+        font-size: clamp(32px, 10vw, 48px);
+        font-weight: bold;
+        background: linear-gradient(45deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 15px;
+        animation: gradientShift 2s ease infinite;
+        text-align: center;
+      }
+
+      .overlay-subtitle {
+        font-size: clamp(14px, 4vw, 18px);
+        color: #fff;
+        margin-bottom: 25px;
+        text-align: center;
+        line-height: 1.6;
+      }
+
+      .btn {
+        padding: 12px 40px;
+        font-size: clamp(18px, 5vw, 24px);
+        font-weight: bold;
+        border: none;
+        border-radius: 50px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        touch-action: manipulation;
+      }
+
+      .btn-start {
+        background: linear-gradient(45deg, #00b894, #00cec9);
+        color: #fff;
+        box-shadow: 0 0 30px rgba(0, 206, 201, 0.5);
+      }
+
+      .btn-start:active {
+        transform: scale(0.95);
+      }
+
+      .btn-restart {
+        background: linear-gradient(45deg, #e74c3c, #c0392b);
+        color: #fff;
+        box-shadow: 0 0 30px rgba(231, 76, 60, 0.5);
+      }
+
+      .btn-restart:active {
+        transform: scale(0.95);
+      }
+
+      /* 能量条效果 */
+      .energy-aura {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        animation: energyPulse 1s ease infinite;
+        pointer-events: none;
+      }
+
+      @keyframes energyPulse {
+        0%,
+        100% {
+          box-shadow:
+            0 0 20px #feca57,
+            0 0 40px #ff6b6b;
+        }
+        50% {
+          box-shadow:
+            0 0 40px #feca57,
+            0 0 80px #ff6b6b;
+        }
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div id="gameContainer">
-        <h1 class="game-title">🥊 翠翠格斗 🥊</h1>
-        
-        <!-- 血条 -->
-        <div class="health-bars">
-            <div class="health-bar-container">
-                <div class="player-name">👤 翠翠</div>
-                <div class="health-bar">
-                    <div class="health-fill player1-health" id="player1Health" style="width: 100%"></div>
-                </div>
-            </div>
-            <div class="vs-text">VS</div>
-            <div class="health-bar-container">
-                <div class="player-name" style="text-align: right;">嘉姐 👹</div>
-                <div class="health-bar">
-                    <div class="health-fill player2-health" id="player2Health" style="width: 100%"></div>
-                </div>
-            </div>
+      <h1 class="game-title">🥊 翠翠格斗 🥊</h1>
+
+      <!-- 血条 -->
+      <div class="health-bars">
+        <div class="health-bar-container">
+          <div class="player-name">👤 翠翠</div>
+          <div class="health-bar">
+            <div
+              class="health-fill player1-health"
+              id="player1Health"
+              style="width: 100%"
+            ></div>
+          </div>
         </div>
-        
-        <!-- 游戏区域 -->
-        <div class="game-area" id="gameArea">
-            <div class="hit-counter">
-                <span class="hit-counter-text">击打: <span id="hitCount">0</span>/100</span>
-            </div>
-            
-            <!-- 角色1 - 翠翠 -->
-            <div class="character player1" id="player1">
-                <div class="character-head">
-                    <div class="character-eyes">
-                        <div class="eye"></div>
-                        <div class="eye"></div>
-                    </div>
-                </div>
-                <div class="character-body">
-                    <div class="belt"></div>
-                    <div class="arm left"><div class="fist"></div></div>
-                    <div class="arm right"><div class="fist"></div></div>
-                    <div class="leg left"><div class="shoe"></div></div>
-                    <div class="leg right"><div class="shoe"></div></div>
-                </div>
-            </div>
-            
-            <!-- 角色2 - 嘉人 -->
-            <div class="character player2" id="player2">
-                <div class="character-head">
-                    <div class="character-eyes">
-                        <div class="eye"></div>
-                        <div class="eye"></div>
-                    </div>
-                </div>
-                <div class="character-body">
-                    <div class="belt"></div>
-                    <div class="arm left"><div class="fist"></div></div>
-                    <div class="arm right"><div class="fist"></div></div>
-                    <div class="leg left"><div class="shoe"></div></div>
-                    <div class="leg right"><div class="shoe"></div></div>
-                </div>
-            </div>
-            
-            <div class="ground"></div>
+        <div class="vs-text">VS</div>
+        <div class="health-bar-container">
+          <div class="player-name" style="text-align: right">嘉人 👹</div>
+          <div class="health-bar">
+            <div
+              class="health-fill player2-health"
+              id="player2Health"
+              style="width: 100%"
+            ></div>
+          </div>
         </div>
-        
-        <!-- 移动端虚拟按键 -->
-        <div class="mobile-controls" id="mobileControls">
-            <div class="d-pad">
-                <div class="d-btn up" id="btnUp">⬆️</div>
-                <div class="d-btn left" id="btnLeft">⬅️</div>
-                <div class="d-btn down" id="btnDown">⬇️</div>
-                <div class="d-btn right" id="btnRight">➡️</div>
-            </div>
-            <div class="action-buttons">
-                <div class="action-btn punch" id="btnPunch">
-                    <span class="icon">👊</span>
-                    <span class="label">拳</span>
-                </div>
-                <div class="action-btn kick" id="btnKick">
-                    <span class="icon">🦶</span>
-                    <span class="label">腿</span>
-                </div>
-                <div class="action-btn throw" id="btnThrow">
-                    <span class="icon">💥</span>
-                    <span class="label">必杀</span>
-                </div>
-            </div>
+      </div>
+
+      <!-- 游戏区域 -->
+      <div class="game-area" id="gameArea">
+        <div class="hit-counter">
+          <span class="hit-counter-text"
+            >击打: <span id="hitCount">0</span>/100</span
+          >
         </div>
+
+        <!-- 角色1 - 翠翠 -->
+        <div class="character player1" id="player1">
+          <div class="character-head">
+            <div class="character-eyes">
+              <div class="eye"></div>
+              <div class="eye"></div>
+            </div>
+          </div>
+          <div class="character-body">
+            <div class="belt"></div>
+            <div class="arm left"><div class="fist"></div></div>
+            <div class="arm right"><div class="fist"></div></div>
+            <div class="leg left"><div class="shoe"></div></div>
+            <div class="leg right"><div class="shoe"></div></div>
+          </div>
+        </div>
+
+        <!-- 角色2 - 嘉人 -->
+        <div class="character player2" id="player2">
+          <div class="character-head">
+            <div class="character-eyes">
+              <div class="eye"></div>
+              <div class="eye"></div>
+            </div>
+          </div>
+          <div class="character-body">
+            <div class="belt"></div>
+            <div class="arm left"><div class="fist"></div></div>
+            <div class="arm right"><div class="fist"></div></div>
+            <div class="leg left"><div class="shoe"></div></div>
+            <div class="leg right"><div class="shoe"></div></div>
+          </div>
+        </div>
+
+        <div class="ground"></div>
+      </div>
+
+      <!-- 移动端虚拟按键 -->
+      <div class="mobile-controls" id="mobileControls">
+        <div class="d-pad">
+          <div class="d-btn up" id="btnUp">⬆️</div>
+          <div class="d-btn left" id="btnLeft">⬅️</div>
+          <div class="d-btn down" id="btnDown">⬇️</div>
+          <div class="d-btn right" id="btnRight">➡️</div>
+        </div>
+        <div class="action-buttons">
+          <div class="action-btn punch" id="btnPunch">
+            <span class="icon">👊</span>
+            <span class="label">拳</span>
+          </div>
+          <div class="action-btn kick" id="btnKick">
+            <span class="icon">🦶</span>
+            <span class="label">腿</span>
+          </div>
+          <div class="action-btn throw" id="btnThrow">
+            <span class="icon">💥</span>
+            <span class="label">必杀</span>
+          </div>
+        </div>
+      </div>
     </div>
-    
+
     <!-- 开始界面 -->
     <div class="overlay" id="startScreen">
-        <h1 class="overlay-title">🥊 翠翠格斗 🥊</h1>
-        <p class="overlay-subtitle">
-            击败嘉姐！击打 100 次获胜！<br>
-            <small>越打越炫酷！💥</small>
-        </p>
-        <button class="btn btn-start" id="startBtn">开始游戏</button>
+      <h1 class="overlay-title">🥊 翠翠格斗 🥊</h1>
+      <p class="overlay-subtitle">
+        击败嘉人！击打 100 次获胜！<br />
+        <small>越打越炫酷！💥</small>
+      </p>
+      <button class="btn btn-start" id="startBtn">开始游戏</button>
     </div>
-    
+
     <!-- 游戏结束界面 -->
     <div class="overlay hidden" id="gameOverScreen">
-        <h1 class="overlay-title" id="winnerText">🎉 胜利！</h1>
-        <p class="overlay-subtitle" id="gameOverSubtitle">
-            总击打次数: <span id="finalHits">0</span>
-        </p>
-        <button class="btn btn-restart" id="restartBtn">再来一局</button>
+      <h1 class="overlay-title" id="winnerText">🎉 胜利！</h1>
+      <p class="overlay-subtitle" id="gameOverSubtitle">
+        总击打次数: <span id="finalHits">0</span>
+      </p>
+      <button class="btn btn-restart" id="restartBtn">再来一局</button>
     </div>
 
     <script>
-        // 检测是否为移动设备
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        
-        // 游戏状态
-        let gameState = {
-            isPlaying: false,
-            player1Health: 100,
-            player2Health: 100,
-            hitCount: 0,
-            targetHits: 100,
-            combo: 0,
-            lastHitTime: 0,
-            player1Pos: { x: 0, y: 0 },
-            player2Pos: { x: 0, y: 0 },
-            isJumping: false,
-            isCrouching: false,
-            facingRight: true
-        };
-        
-        // DOM 元素
-        const player1 = document.getElementById('player1');
-        const player2 = document.getElementById('player2');
-        const player1Health = document.getElementById('player1Health');
-        const player2Health = document.getElementById('player2Health');
-        const hitCountEl = document.getElementById('hitCount');
-        const gameArea = document.getElementById('gameArea');
-        const startScreen = document.getElementById('startScreen');
-        const gameOverScreen = document.getElementById('gameOverScreen');
-        const winnerText = document.getElementById('winnerText');
-        const gameOverSubtitle = document.getElementById('gameOverSubtitle');
-        const finalHits = document.getElementById('finalHits');
-        
-        // 获取游戏区域尺寸
-        function getGameAreaWidth() {
-            return gameArea.clientWidth;
+      // 检测是否为移动设备
+      const isMobile =
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+          navigator.userAgent,
+        )
+
+      // 游戏状态
+      let gameState = {
+        isPlaying: false,
+        player1Health: 100,
+        player2Health: 100,
+        hitCount: 0,
+        targetHits: 100,
+        combo: 0,
+        lastHitTime: 0,
+        player1Pos: { x: 0, y: 0 },
+        player2Pos: { x: 0, y: 0 },
+        isJumping: false,
+        isCrouching: false,
+        facingRight: true,
+      }
+
+      // DOM 元素
+      const player1 = document.getElementById('player1')
+      const player2 = document.getElementById('player2')
+      const player1Health = document.getElementById('player1Health')
+      const player2Health = document.getElementById('player2Health')
+      const hitCountEl = document.getElementById('hitCount')
+      const gameArea = document.getElementById('gameArea')
+      const startScreen = document.getElementById('startScreen')
+      const gameOverScreen = document.getElementById('gameOverScreen')
+      const winnerText = document.getElementById('winnerText')
+      const gameOverSubtitle = document.getElementById('gameOverSubtitle')
+      const finalHits = document.getElementById('finalHits')
+
+      // 获取游戏区域尺寸
+      function getGameAreaWidth() {
+        return gameArea.clientWidth
+      }
+
+      // 初始化位置
+      function initPositions() {
+        const width = getGameAreaWidth()
+        gameState.player1Pos.x = width * 0.15
+        gameState.player2Pos.x = width * 0.85 - 100
+        player1.style.left = gameState.player1Pos.x + 'px'
+        player2.style.right = '15%'
+      }
+
+      // 开始游戏
+      function startGame() {
+        gameState.isPlaying = true
+        gameState.player1Health = 100
+        gameState.player2Health = 100
+        gameState.hitCount = 0
+        gameState.combo = 0
+        gameState.isJumping = false
+        gameState.isCrouching = false
+        gameState.facingRight = true
+
+        updateHealthBars()
+        updateHitCount()
+        initPositions()
+
+        startScreen.classList.add('hidden')
+        gameOverScreen.classList.add('hidden')
+
+        player1.classList.remove('jumping', 'crouching')
+        player1.style.transform = 'scaleX(1)'
+
+        // 启动敌人AI
+        startEnemyAI()
+      }
+
+      // 重新开始
+      function restartGame() {
+        startGame()
+      }
+
+      // 更新血条
+      function updateHealthBars() {
+        player1Health.style.width = gameState.player1Health + '%'
+        player2Health.style.width = gameState.player2Health + '%'
+      }
+
+      // 更新击打次数
+      function updateHitCount() {
+        hitCountEl.textContent = gameState.hitCount
+      }
+
+      // 创建特效 - 增强版
+      function createHitEffect(x, y, level) {
+        const effect = document.createElement('div')
+        effect.className = `effect hit-effect-${level}`
+        effect.style.left = x - 35 + 'px'
+        effect.style.top = y - 35 + 'px'
+        gameArea.appendChild(effect)
+
+        setTimeout(() => effect.remove(), 800)
+      }
+
+      // 创建伤害数字 - 增强版
+      function createDamageText(x, y, damage, isCritical = false) {
+        const text = document.createElement('div')
+        text.className = isCritical ? 'damage-text critical' : 'damage-text'
+        text.textContent = '-' + damage
+        text.style.left = x + (Math.random() - 0.5) * 40 + 'px'
+        text.style.top = y + 'px'
+        gameArea.appendChild(text)
+
+        setTimeout(() => text.remove(), 1200)
+      }
+
+      // 创建连击显示 - 增强版
+      function createComboDisplay(combo) {
+        const display = document.createElement('div')
+        display.className = 'combo-display'
+        display.textContent = combo + ' 连击!'
+        gameArea.appendChild(display)
+
+        setTimeout(() => display.remove(), 800)
+      }
+
+      // 创建粒子效果 - 增强版
+      function createParticles(x, y, count, colors) {
+        for (let i = 0; i < count; i++) {
+          const particle = document.createElement('div')
+          const isStar = Math.random() > 0.5
+          particle.className = isStar ? 'particle star' : 'particle spark'
+          particle.style.left = x + 'px'
+          particle.style.top = y + 'px'
+          particle.style.background =
+            colors[Math.floor(Math.random() * colors.length)]
+
+          const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.5
+          const velocity = 60 + Math.random() * 120
+          const tx = Math.cos(angle) * velocity
+          const ty = Math.sin(angle) * velocity
+
+          particle.style.transition =
+            'all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+
+          gameArea.appendChild(particle)
+
+          requestAnimationFrame(() => {
+            particle.style.transform = `translate(${tx}px, ${ty}px) rotate(${Math.random() * 720}deg)`
+            particle.style.opacity = '0'
+          })
+
+          setTimeout(() => particle.remove(), 600)
         }
-        
-        // 初始化位置
-        function initPositions() {
-            const width = getGameAreaWidth();
-            gameState.player1Pos.x = width * 0.15;
-            gameState.player2Pos.x = width * 0.85 - 100;
-            player1.style.left = gameState.player1Pos.x + 'px';
-            player2.style.right = '15%';
+      }
+
+      // 创建冲击波 - 增强版
+      function createShockwave(x, y) {
+        const wave = document.createElement('div')
+        wave.className = 'shockwave'
+        wave.style.left = x + 'px'
+        wave.style.top = y + 'px'
+        wave.style.transform = 'translate(-50%, -50%)'
+        gameArea.appendChild(wave)
+
+        setTimeout(() => wave.remove(), 800)
+      }
+
+      // 创建闪光 - 增强版
+      function createFlash() {
+        const flash = document.createElement('div')
+        flash.className = 'flash'
+        gameArea.appendChild(flash)
+
+        setTimeout(() => flash.remove(), 150)
+      }
+
+      // 创建斩击轨迹
+      function createSlashTrail(x, y) {
+        const slash = document.createElement('div')
+        slash.className = 'slash-trail'
+        slash.style.left = x - 40 + 'px'
+        slash.style.top = y - 40 + 'px'
+        gameArea.appendChild(slash)
+
+        setTimeout(() => slash.remove(), 400)
+      }
+
+      // 屏幕震动
+      function screenShake(intensity = 1) {
+        gameArea.classList.add('screen-shake')
+        setTimeout(() => gameArea.classList.remove('screen-shake'), 300)
+      }
+
+      // 根据击打次数获取特效等级
+      function getEffectLevel() {
+        const hits = gameState.hitCount
+        if (hits < 20) return 1
+        if (hits < 50) return 2
+        if (hits < 80) return 3
+        return 4
+      }
+
+      // 攻击 - 增强版
+      function attack(type) {
+        if (!gameState.isPlaying) return
+
+        // 检查距离
+        const distance = Math.abs(
+          gameState.player1Pos.x - gameState.player2Pos.x,
+        )
+        if (distance > 280) return
+
+        // 播放攻击动画
+        player1.classList.add(type + 'ing')
+        setTimeout(() => player1.classList.remove(type + 'ing'), 500)
+
+        // 计算伤害
+        let damage = 1
+        let isCritical = false
+        const hitX = gameState.player2Pos.x + 50
+        const hitY = gameArea.clientHeight * 0.4
+
+        if (type === 'punch') {
+          damage = 1 + Math.floor(Math.random())
+        } else if (type === 'kick') {
+          damage = 2 + Math.floor(Math.random() * 2)
+        } else if (type === 'throw') {
+          damage = 3 + Math.floor(Math.random() * 3)
+          isCritical = true
         }
-        
-        // 开始游戏
-        function startGame() {
-            gameState.isPlaying = true;
-            gameState.player1Health = 100;
-            gameState.player2Health = 100;
-            gameState.hitCount = 0;
-            gameState.combo = 0;
-            gameState.isJumping = false;
-            gameState.isCrouching = false;
-            gameState.facingRight = true;
-            
-            updateHealthBars();
-            updateHitCount();
-            initPositions();
-            
-            startScreen.classList.add('hidden');
-            gameOverScreen.classList.add('hidden');
-            
-            player1.classList.remove('jumping', 'crouching');
-            player1.style.transform = 'scaleX(1)';
-            
-            // 启动敌人AI
-            startEnemyAI();
+
+        // 连击加成
+        if (gameState.combo >= 5) {
+          damage += 1
+          isCritical = true
         }
-        
-        // 重新开始
-        function restartGame() {
-            startGame();
+
+        // 应用伤害
+        gameState.hitCount += damage
+        gameState.player2Health = Math.max(0, 100 - gameState.hitCount)
+
+        // 连击系统
+        const now = Date.now()
+        if (now - gameState.lastHitTime < 1200) {
+          gameState.combo++
+          if (gameState.combo > 2) {
+            createComboDisplay(gameState.combo)
+          }
+        } else {
+          gameState.combo = 1
         }
-        
-        // 更新血条
-        function updateHealthBars() {
-            player1Health.style.width = gameState.player1Health + '%';
-            player2Health.style.width = gameState.player2Health + '%';
+        gameState.lastHitTime = now
+
+        // 获取特效等级
+        const effectLevel = getEffectLevel()
+
+        // 创建特效
+        createHitEffect(hitX, hitY, effectLevel)
+        createDamageText(hitX, hitY - 60, damage, isCritical)
+
+        // 粒子效果
+        const colors = ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#fff']
+        createParticles(hitX, hitY, 8 * effectLevel, colors)
+
+        // 斩击轨迹（高级特效）
+        if (effectLevel >= 2) {
+          createSlashTrail(hitX, hitY)
         }
-        
-        // 更新击打次数
-        function updateHitCount() {
-            hitCountEl.textContent = gameState.hitCount;
+
+        // 冲击波
+        if (effectLevel >= 3) {
+          createShockwave(hitX, hitY)
+          screenShake(effectLevel - 2)
         }
-        
-        // 创建特效 - 增强版
-        function createHitEffect(x, y, level) {
-            const effect = document.createElement('div');
-            effect.className = `effect hit-effect-${level}`;
-            effect.style.left = (x - 35) + 'px';
-            effect.style.top = (y - 35) + 'px';
-            gameArea.appendChild(effect);
-            
-            setTimeout(() => effect.remove(), 800);
+
+        // 闪光 + 震动
+        if (effectLevel >= 4) {
+          createFlash()
+          screenShake(2)
         }
-        
-        // 创建伤害数字 - 增强版
-        function createDamageText(x, y, damage, isCritical = false) {
-            const text = document.createElement('div');
-            text.className = isCritical ? 'damage-text critical' : 'damage-text';
-            text.textContent = '-' + damage;
-            text.style.left = (x + (Math.random() - 0.5) * 40) + 'px';
-            text.style.top = y + 'px';
-            gameArea.appendChild(text);
-            
-            setTimeout(() => text.remove(), 1200);
+
+        // 受击动画
+        player2.classList.add('hit')
+        setTimeout(() => player2.classList.remove('hit'), 400)
+
+        // 震动效果（移动端）
+        if (navigator.vibrate && isMobile) {
+          navigator.vibrate([30, 20, 30])
         }
-        
-        // 创建连击显示 - 增强版
-        function createComboDisplay(combo) {
-            const display = document.createElement('div');
-            display.className = 'combo-display';
-            display.textContent = combo + ' 连击!';
-            gameArea.appendChild(display);
-            
-            setTimeout(() => display.remove(), 800);
+
+        // 更新UI
+        updateHealthBars()
+        updateHitCount()
+
+        // 检查游戏结束
+        if (gameState.hitCount >= gameState.targetHits) {
+          endGame(true)
         }
-        
-        // 创建粒子效果 - 增强版
-        function createParticles(x, y, count, colors) {
-            for (let i = 0; i < count; i++) {
-                const particle = document.createElement('div');
-                const isStar = Math.random() > 0.5;
-                particle.className = isStar ? 'particle star' : 'particle spark';
-                particle.style.left = x + 'px';
-                particle.style.top = y + 'px';
-                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
-                
-                const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.5;
-                const velocity = 60 + Math.random() * 120;
-                const tx = Math.cos(angle) * velocity;
-                const ty = Math.sin(angle) * velocity;
-                
-                particle.style.transition = 'all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-                
-                gameArea.appendChild(particle);
-                
-                requestAnimationFrame(() => {
-                    particle.style.transform = `translate(${tx}px, ${ty}px) rotate(${Math.random() * 720}deg)`;
-                    particle.style.opacity = '0';
-                });
-                
-                setTimeout(() => particle.remove(), 600);
-            }
+      }
+
+      // 移动
+      function movePlayer(direction) {
+        if (!gameState.isPlaying) return
+        if (gameState.isJumping) return
+
+        const speed = getGameAreaWidth() * 0.04
+        const minX = 10
+        const maxX = getGameAreaWidth() - 110
+
+        if (direction === 'left') {
+          gameState.player1Pos.x = Math.max(
+            minX,
+            gameState.player1Pos.x - speed,
+          )
+          gameState.facingRight = false
+          player1.style.transform = 'scaleX(-1)'
+        } else if (direction === 'right') {
+          gameState.player1Pos.x = Math.min(
+            maxX,
+            gameState.player1Pos.x + speed,
+          )
+          gameState.facingRight = true
+          player1.style.transform = 'scaleX(1)'
         }
-        
-        // 创建冲击波 - 增强版
-        function createShockwave(x, y) {
-            const wave = document.createElement('div');
-            wave.className = 'shockwave';
-            wave.style.left = x + 'px';
-            wave.style.top = y + 'px';
-            wave.style.transform = 'translate(-50%, -50%)';
-            gameArea.appendChild(wave);
-            
-            setTimeout(() => wave.remove(), 800);
+
+        player1.style.left = gameState.player1Pos.x + 'px'
+      }
+
+      // 跳跃
+      function jump() {
+        if (
+          !gameState.isPlaying ||
+          gameState.isJumping ||
+          gameState.isCrouching
+        )
+          return
+
+        gameState.isJumping = true
+        player1.classList.add('jumping')
+
+        setTimeout(() => {
+          player1.classList.remove('jumping')
+          gameState.isJumping = false
+        }, 600)
+      }
+
+      // 蹲下
+      function crouch(active) {
+        if (!gameState.isPlaying || gameState.isJumping) return
+
+        gameState.isCrouching = active
+        if (active) {
+          player1.classList.add('crouching')
+        } else {
+          player1.classList.remove('crouching')
         }
-        
-        // 创建闪光 - 增强版
-        function createFlash() {
-            const flash = document.createElement('div');
-            flash.className = 'flash';
-            gameArea.appendChild(flash);
-            
-            setTimeout(() => flash.remove(), 150);
+      }
+
+      // 敌人AI
+      function startEnemyAI() {
+        if (!gameState.isPlaying) return
+
+        const moveInterval = setInterval(() => {
+          if (!gameState.isPlaying) {
+            clearInterval(moveInterval)
+            return
+          }
+
+          // 向玩家移动
+          const distance = gameState.player2Pos.x - gameState.player1Pos.x
+          if (distance > 180) {
+            gameState.player2Pos.x -= 2
+          } else if (distance < -180) {
+            gameState.player2Pos.x += 2
+          }
+
+          player2.style.right =
+            getGameAreaWidth() - gameState.player2Pos.x - 100 + 'px'
+
+          // 随机攻击
+          if (Math.random() < 0.015 && Math.abs(distance) < 220) {
+            enemyAttack()
+          }
+        }, 50)
+      }
+
+      // 敌人攻击
+      function enemyAttack() {
+        player2.classList.add('punching')
+        setTimeout(() => player2.classList.remove('punching'), 200)
+
+        // 玩家受伤
+        if (!gameState.isCrouching && !gameState.isJumping) {
+          gameState.player1Health = Math.max(0, gameState.player1Health - 5)
+          updateHealthBars()
+
+          player1.classList.add('hit')
+          setTimeout(() => player1.classList.remove('hit'), 300)
+
+          // 创建小特效
+          createHitEffect(
+            gameState.player1Pos.x + 50,
+            gameArea.clientHeight * 0.4,
+            1,
+          )
+          createDamageText(
+            gameState.player1Pos.x + 50,
+            gameArea.clientHeight * 0.4 - 50,
+            5,
+          )
+
+          // 震动
+          if (navigator.vibrate && isMobile) {
+            navigator.vibrate(40)
+          }
+
+          if (gameState.player1Health <= 0) {
+            endGame(false)
+          }
         }
-        
-        // 创建斩击轨迹
-        function createSlashTrail(x, y) {
-            const slash = document.createElement('div');
-            slash.className = 'slash-trail';
-            slash.style.left = (x - 40) + 'px';
-            slash.style.top = (y - 40) + 'px';
-            gameArea.appendChild(slash);
-            
-            setTimeout(() => slash.remove(), 400);
+      }
+
+      // 游戏结束
+      function endGame(playerWon) {
+        gameState.isPlaying = false
+
+        setTimeout(() => {
+          if (playerWon) {
+            winnerText.textContent = '🎉 胜利！'
+            winnerText.style.background =
+              'linear-gradient(45deg, #00b894, #00cec9)'
+            winnerText.style.webkitBackgroundClip = 'text'
+            gameOverSubtitle.innerHTML = `你成功击败了嘉人！<br>总击打次数: ${gameState.hitCount}`
+          } else {
+            winnerText.textContent = '💀 失败'
+            winnerText.style.background =
+              'linear-gradient(45deg, #e74c3c, #c0392b)'
+            winnerText.style.webkitBackgroundClip = 'text'
+            gameOverSubtitle.innerHTML = `你被嘉人击败了！<br>总击打次数: ${gameState.hitCount}`
+          }
+
+          finalHits.textContent = gameState.hitCount
+          gameOverScreen.classList.remove('hidden')
+        }, 500)
+      }
+
+      // 键盘事件
+      document.addEventListener('keydown', (e) => {
+        if (!gameState.isPlaying) return
+
+        switch (e.key) {
+          case 'ArrowLeft':
+            movePlayer('left')
+            break
+          case 'ArrowRight':
+            movePlayer('right')
+            break
+          case 'ArrowUp':
+            jump()
+            break
+          case 'ArrowDown':
+            crouch(true)
+            break
         }
-        
-        // 屏幕震动
-        function screenShake(intensity = 1) {
-            gameArea.classList.add('screen-shake');
-            setTimeout(() => gameArea.classList.remove('screen-shake'), 300);
+
+        // 攻击
+        if (e.key === 'a' || e.key === 'A') {
+          if (!e.repeat) attack('punch')
         }
-        
-        // 根据击打次数获取特效等级
-        function getEffectLevel() {
-            const hits = gameState.hitCount;
-            if (hits < 20) return 1;
-            if (hits < 50) return 2;
-            if (hits < 80) return 3;
-            return 4;
+        if (e.key === 's' || e.key === 'S') {
+          if (!e.repeat) attack('kick')
         }
-        
-        // 攻击 - 增强版
-        function attack(type) {
-            if (!gameState.isPlaying) return;
-            
-            // 检查距离
-            const distance = Math.abs(gameState.player1Pos.x - gameState.player2Pos.x);
-            if (distance > 280) return;
-            
-            // 播放攻击动画
-            player1.classList.add(type + 'ing');
-            setTimeout(() => player1.classList.remove(type + 'ing'), 500);
-            
-            // 计算伤害
-            let damage = 1;
-            let isCritical = false;
-            const hitX = gameState.player2Pos.x + 50;
-            const hitY = gameArea.clientHeight * 0.4;
-            
-            if (type === 'punch') {
-                damage = 1 + Math.floor(Math.random());
-            } else if (type === 'kick') {
-                damage = 2 + Math.floor(Math.random() * 2);
-            } else if (type === 'throw') {
-                damage = 3 + Math.floor(Math.random() * 3);
-                isCritical = true;
-            }
-            
-            // 连击加成
-            if (gameState.combo >= 5) {
-                damage += 1;
-                isCritical = true;
-            }
-            
-            // 应用伤害
-            gameState.hitCount += damage;
-            gameState.player2Health = Math.max(0, 100 - gameState.hitCount);
-            
-            // 连击系统
-            const now = Date.now();
-            if (now - gameState.lastHitTime < 1200) {
-                gameState.combo++;
-                if (gameState.combo > 2) {
-                    createComboDisplay(gameState.combo);
-                }
-            } else {
-                gameState.combo = 1;
-            }
-            gameState.lastHitTime = now;
-            
-            // 获取特效等级
-            const effectLevel = getEffectLevel();
-            
-            // 创建特效
-            createHitEffect(hitX, hitY, effectLevel);
-            createDamageText(hitX, hitY - 60, damage, isCritical);
-            
-            // 粒子效果
-            const colors = ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#fff'];
-            createParticles(hitX, hitY, 8 * effectLevel, colors);
-            
-            // 斩击轨迹（高级特效）
-            if (effectLevel >= 2) {
-                createSlashTrail(hitX, hitY);
-            }
-            
-            // 冲击波
-            if (effectLevel >= 3) {
-                createShockwave(hitX, hitY);
-                screenShake(effectLevel - 2);
-            }
-            
-            // 闪光 + 震动
-            if (effectLevel >= 4) {
-                createFlash();
-                screenShake(2);
-            }
-            
-            // 受击动画
-            player2.classList.add('hit');
-            setTimeout(() => player2.classList.remove('hit'), 400);
-            
-            // 震动效果（移动端）
-            if (navigator.vibrate && isMobile) {
-                navigator.vibrate([30, 20, 30]);
-            }
-            
-            // 更新UI
-            updateHealthBars();
-            updateHitCount();
-            
-            // 检查游戏结束
-            if (gameState.hitCount >= gameState.targetHits) {
-                endGame(true);
-            }
+        if (e.key === 'd' || e.key === 'D') {
+          if (!e.repeat) attack('throw')
         }
-        
-        // 移动
-        function movePlayer(direction) {
-            if (!gameState.isPlaying) return;
-            if (gameState.isJumping) return;
-            
-            const speed = getGameAreaWidth() * 0.04;
-            const minX = 10;
-            const maxX = getGameAreaWidth() - 110;
-            
-            if (direction === 'left') {
-                gameState.player1Pos.x = Math.max(minX, gameState.player1Pos.x - speed);
-                gameState.facingRight = false;
-                player1.style.transform = 'scaleX(-1)';
-            } else if (direction === 'right') {
-                gameState.player1Pos.x = Math.min(maxX, gameState.player1Pos.x + speed);
-                gameState.facingRight = true;
-                player1.style.transform = 'scaleX(1)';
-            }
-            
-            player1.style.left = gameState.player1Pos.x + 'px';
+      })
+
+      document.addEventListener('keyup', (e) => {
+        if (e.key === 'ArrowDown') {
+          crouch(false)
         }
-        
-        // 跳跃
-        function jump() {
-            if (!gameState.isPlaying || gameState.isJumping || gameState.isCrouching) return;
-            
-            gameState.isJumping = true;
-            player1.classList.add('jumping');
-            
-            setTimeout(() => {
-                player1.classList.remove('jumping');
-                gameState.isJumping = false;
-            }, 600);
+      })
+
+      // 防止方向键滚动页面
+      window.addEventListener('keydown', (e) => {
+        if (
+          ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(
+            e.key,
+          )
+        ) {
+          e.preventDefault()
         }
-        
-        // 蹲下
-        function crouch(active) {
-            if (!gameState.isPlaying || gameState.isJumping) return;
-            
-            gameState.isCrouching = active;
-            if (active) {
-                player1.classList.add('crouching');
-            } else {
-                player1.classList.remove('crouching');
-            }
+      })
+
+      // 移动端虚拟按键事件
+      function setupMobileControls() {
+        const btnUp = document.getElementById('btnUp')
+        const btnDown = document.getElementById('btnDown')
+        const btnLeft = document.getElementById('btnLeft')
+        const btnRight = document.getElementById('btnRight')
+        const btnPunch = document.getElementById('btnPunch')
+        const btnKick = document.getElementById('btnKick')
+        const btnThrow = document.getElementById('btnThrow')
+
+        // 触摸事件
+        btnUp.addEventListener('touchstart', (e) => {
+          e.preventDefault()
+          jump()
+        })
+
+        btnDown.addEventListener('touchstart', (e) => {
+          e.preventDefault()
+          crouch(true)
+        })
+
+        btnDown.addEventListener('touchend', (e) => {
+          e.preventDefault()
+          crouch(false)
+        })
+
+        btnPunch.addEventListener('touchstart', (e) => {
+          e.preventDefault()
+          attack('punch')
+        })
+
+        btnKick.addEventListener('touchstart', (e) => {
+          e.preventDefault()
+          attack('kick')
+        })
+
+        btnThrow.addEventListener('touchstart', (e) => {
+          e.preventDefault()
+          attack('throw')
+        })
+
+        // 长按连续移动
+        let moveInterval = null
+
+        btnLeft.addEventListener('touchstart', (e) => {
+          e.preventDefault()
+          movePlayer('left')
+          moveInterval = setInterval(() => movePlayer('left'), 80)
+        })
+
+        btnRight.addEventListener('touchstart', (e) => {
+          e.preventDefault()
+          movePlayer('right')
+          moveInterval = setInterval(() => movePlayer('right'), 80)
+        })
+
+        const clearMove = () => {
+          if (moveInterval) {
+            clearInterval(moveInterval)
+            moveInterval = null
+          }
         }
-        
-        // 敌人AI
-        function startEnemyAI() {
-            if (!gameState.isPlaying) return;
-            
-            const moveInterval = setInterval(() => {
-                if (!gameState.isPlaying) {
-                    clearInterval(moveInterval);
-                    return;
-                }
-                
-                // 向玩家移动
-                const distance = gameState.player2Pos.x - gameState.player1Pos.x;
-                if (distance > 180) {
-                    gameState.player2Pos.x -= 2;
-                } else if (distance < -180) {
-                    gameState.player2Pos.x += 2;
-                }
-                
-                player2.style.right = (getGameAreaWidth() - gameState.player2Pos.x - 100) + 'px';
-                
-                // 随机攻击
-                if (Math.random() < 0.015 && Math.abs(distance) < 220) {
-                    enemyAttack();
-                }
-            }, 50);
+
+        btnLeft.addEventListener('touchend', clearMove)
+        btnLeft.addEventListener('touchcancel', clearMove)
+        btnRight.addEventListener('touchend', clearMove)
+        btnRight.addEventListener('touchcancel', clearMove)
+      }
+
+      // 按钮事件
+      document.getElementById('startBtn').addEventListener('click', startGame)
+      document.getElementById('startBtn').addEventListener('touchend', (e) => {
+        e.preventDefault()
+        startGame()
+      })
+
+      document
+        .getElementById('restartBtn')
+        .addEventListener('click', restartGame)
+      document
+        .getElementById('restartBtn')
+        .addEventListener('touchend', (e) => {
+          e.preventDefault()
+          restartGame()
+        })
+
+      // 初始化移动端控制
+      setupMobileControls()
+
+      // 窗口大小改变时重新计算位置
+      window.addEventListener('resize', () => {
+        if (gameState.isPlaying) {
+          initPositions()
         }
-        
-        // 敌人攻击
-        function enemyAttack() {
-            player2.classList.add('punching');
-            setTimeout(() => player2.classList.remove('punching'), 200);
-            
-            // 玩家受伤
-            if (!gameState.isCrouching && !gameState.isJumping) {
-                gameState.player1Health = Math.max(0, gameState.player1Health - 5);
-                updateHealthBars();
-                
-                player1.classList.add('hit');
-                setTimeout(() => player1.classList.remove('hit'), 300);
-                
-                // 创建小特效
-                createHitEffect(gameState.player1Pos.x + 50, gameArea.clientHeight * 0.4, 1);
-                createDamageText(gameState.player1Pos.x + 50, gameArea.clientHeight * 0.4 - 50, 5);
-                
-                // 震动
-                if (navigator.vibrate && isMobile) {
-                    navigator.vibrate(40);
-                }
-                
-                if (gameState.player1Health <= 0) {
-                    endGame(false);
-                }
-            }
-        }
-        
-        // 游戏结束
-        function endGame(playerWon) {
-            gameState.isPlaying = false;
-            
-            setTimeout(() => {
-                if (playerWon) {
-                    winnerText.textContent = '🎉 胜利！';
-                    winnerText.style.background = 'linear-gradient(45deg, #00b894, #00cec9)';
-                    winnerText.style.webkitBackgroundClip = 'text';
-                    gameOverSubtitle.innerHTML = `你成功击败了嘉姐！<br>总击打次数: ${gameState.hitCount}`;
-                } else {
-                    winnerText.textContent = '💀 失败';
-                    winnerText.style.background = 'linear-gradient(45deg, #e74c3c, #c0392b)';
-                    winnerText.style.webkitBackgroundClip = 'text';
-                    gameOverSubtitle.innerHTML = `你被嘉姐击败了！<br>总击打次数: ${gameState.hitCount}`;
-                }
-                
-                finalHits.textContent = gameState.hitCount;
-                gameOverScreen.classList.remove('hidden');
-            }, 500);
-        }
-        
-        // 键盘事件
-        document.addEventListener('keydown', (e) => {
-            if (!gameState.isPlaying) return;
-            
-            switch(e.key) {
-                case 'ArrowLeft':
-                    movePlayer('left');
-                    break;
-                case 'ArrowRight':
-                    movePlayer('right');
-                    break;
-                case 'ArrowUp':
-                    jump();
-                    break;
-                case 'ArrowDown':
-                    crouch(true);
-                    break;
-            }
-            
-            // 攻击
-            if (e.key === 'a' || e.key === 'A') {
-                if (!e.repeat) attack('punch');
-            }
-            if (e.key === 's' || e.key === 'S') {
-                if (!e.repeat) attack('kick');
-            }
-            if (e.key === 'd' || e.key === 'D') {
-                if (!e.repeat) attack('throw');
-            }
-        });
-        
-        document.addEventListener('keyup', (e) => {
-            if (e.key === 'ArrowDown') {
-                crouch(false);
-            }
-        });
-        
-        // 防止方向键滚动页面
-        window.addEventListener('keydown', (e) => {
-            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) {
-                e.preventDefault();
-            }
-        });
-        
-        // 移动端虚拟按键事件
-        function setupMobileControls() {
-            const btnUp = document.getElementById('btnUp');
-            const btnDown = document.getElementById('btnDown');
-            const btnLeft = document.getElementById('btnLeft');
-            const btnRight = document.getElementById('btnRight');
-            const btnPunch = document.getElementById('btnPunch');
-            const btnKick = document.getElementById('btnKick');
-            const btnThrow = document.getElementById('btnThrow');
-            
-            // 触摸事件
-            btnUp.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                jump();
-            });
-            
-            btnDown.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                crouch(true);
-            });
-            
-            btnDown.addEventListener('touchend', (e) => {
-                e.preventDefault();
-                crouch(false);
-            });
-            
-            btnPunch.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                attack('punch');
-            });
-            
-            btnKick.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                attack('kick');
-            });
-            
-            btnThrow.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                attack('throw');
-            });
-            
-            // 长按连续移动
-            let moveInterval = null;
-            
-            btnLeft.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                movePlayer('left');
-                moveInterval = setInterval(() => movePlayer('left'), 80);
-            });
-            
-            btnRight.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                movePlayer('right');
-                moveInterval = setInterval(() => movePlayer('right'), 80);
-            });
-            
-            const clearMove = () => {
-                if (moveInterval) {
-                    clearInterval(moveInterval);
-                    moveInterval = null;
-                }
-            };
-            
-            btnLeft.addEventListener('touchend', clearMove);
-            btnLeft.addEventListener('touchcancel', clearMove);
-            btnRight.addEventListener('touchend', clearMove);
-            btnRight.addEventListener('touchcancel', clearMove);
-        }
-        
-        // 按钮事件
-        document.getElementById('startBtn').addEventListener('click', startGame);
-        document.getElementById('startBtn').addEventListener('touchend', (e) => {
-            e.preventDefault();
-            startGame();
-        });
-        
-        document.getElementById('restartBtn').addEventListener('click', restartGame);
-        document.getElementById('restartBtn').addEventListener('touchend', (e) => {
-            e.preventDefault();
-            restartGame();
-        });
-        
-        // 初始化移动端控制
-        setupMobileControls();
-        
-        // 窗口大小改变时重新计算位置
-        window.addEventListener('resize', () => {
-            if (gameState.isPlaying) {
-                initPositions();
-            }
-        });
-        
-        // 防止双击缩放
-        let lastTouchEnd = 0;
-        document.addEventListener('touchend', (e) => {
-            const now = Date.now();
-            if (now - lastTouchEnd <= 300) {
-                e.preventDefault();
-            }
-            lastTouchEnd = now;
-        }, false);
-        
-        // 防止页面滚动
-        document.body.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-        }, { passive: false });
+      })
+
+      // 防止双击缩放
+      let lastTouchEnd = 0
+      document.addEventListener(
+        'touchend',
+        (e) => {
+          const now = Date.now()
+          if (now - lastTouchEnd <= 300) {
+            e.preventDefault()
+          }
+          lastTouchEnd = now
+        },
+        false,
+      )
+
+      // 防止页面滚动
+      document.body.addEventListener(
+        'touchmove',
+        (e) => {
+          e.preventDefault()
+        },
+        { passive: false },
+      )
     </script>
-</body>
+  </body>
 </html>
