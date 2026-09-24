@@ -3,18 +3,20 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-  <meta name="theme-color" content="#101413">
-  <title>杨志涛护盾大作战</title>
+  <meta name="theme-color" content="#151b17">
+  <title>养殖杨志涛</title>
   <style>
     :root {
       color-scheme: dark;
-      --ink: #f5f8f2;
-      --muted: #a8b5a9;
+      --ink: #f6f7f2;
+      --muted: #a5b2a8;
+      --surface: #1d2520;
+      --surface-strong: rgba(17, 23, 19, 0.88);
+      --line: rgba(246, 247, 242, 0.13);
       --green: #39d98a;
-      --red: #ef5350;
-      --amber: #f5b731;
-      --panel: rgba(19, 24, 21, 0.9);
-      --line: rgba(245, 248, 242, 0.14);
+      --amber: #f2a04b;
+      --blue: #38bdf8;
+      --pink: #ef5f7a;
     }
 
     * {
@@ -28,10 +30,9 @@
       margin: 0;
       overflow: hidden;
       overscroll-behavior: none;
-      background: #101413;
+      background: #151b17;
       color: var(--ink);
       font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Noto Sans SC", sans-serif;
-      touch-action: none;
       user-select: none;
       -webkit-user-select: none;
     }
@@ -39,225 +40,536 @@
     #app {
       position: fixed;
       inset: 0;
-    }
-
-    #stage {
-      display: block;
+      display: grid;
+      grid-template-rows: auto auto minmax(0, 1fr) auto;
+      gap: 10px;
       width: 100%;
-      height: 100%;
+      height: 100dvh;
+      padding: max(12px, env(safe-area-inset-top)) 14px max(10px, env(safe-area-inset-bottom));
+      background:
+        radial-gradient(circle at 50% 20%, rgba(57, 217, 138, 0.12), transparent 42%),
+        linear-gradient(180deg, #17201a 0%, #121814 68%, #101512 100%);
     }
 
-    .hud {
-      position: fixed;
-      z-index: 3;
-      top: max(14px, env(safe-area-inset-top));
-      left: 14px;
-      right: 14px;
+    .topbar {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 10px;
-      pointer-events: none;
+      gap: 12px;
     }
 
-    .metric {
-      min-width: 68px;
-      padding: 8px 11px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: rgba(12, 16, 14, 0.72);
-      backdrop-filter: blur(12px);
-    }
-
-    .metric-label {
-      display: block;
-      font-size: 11px;
-      line-height: 1;
-      color: var(--muted);
-    }
-
-    .metric-value {
-      display: block;
-      margin-top: 4px;
-      font-size: 18px;
-      font-weight: 750;
-      line-height: 1;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .energy {
-      flex: 1;
-      max-width: 150px;
-    }
-
-    .energy-track {
-      height: 8px;
-      margin-top: 7px;
-      overflow: hidden;
-      border-radius: 99px;
-      background: rgba(245, 248, 242, 0.14);
-    }
-
-    #energyBar {
-      width: 100%;
-      height: 100%;
-      border-radius: 99px;
-      background: linear-gradient(90deg, #2ec27e, var(--green));
-      transform-origin: left center;
-      transition: transform 0.1s linear;
-    }
-
-    .overlay {
-      position: fixed;
-      z-index: 5;
-      inset: 0;
-      display: grid;
-      place-items: center;
-      padding: 20px;
-      background: rgba(8, 11, 9, 0.72);
-      backdrop-filter: blur(10px);
-      transition: opacity 0.2s ease, visibility 0.2s ease;
-    }
-
-    .overlay.hidden {
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-    }
-
-    .panel {
-      width: min(100%, 360px);
-      padding: 26px 22px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: var(--panel);
-      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.42);
-      text-align: center;
-    }
-
-    .eyebrow {
+    .title-block p {
       margin: 0;
       color: var(--amber);
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 700;
-      letter-spacing: 0;
     }
 
     h1 {
-      margin: 8px 0 12px;
-      font-size: 28px;
+      margin: 3px 0 0;
+      font-size: 24px;
       line-height: 1.2;
       letter-spacing: 0;
     }
 
-    .description {
-      margin: 0 auto 20px;
-      max-width: 280px;
-      color: var(--muted);
-      font-size: 14px;
-      line-height: 1.6;
-    }
-
-    .result {
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-      margin-bottom: 20px;
-    }
-
-    .result div {
-      min-width: 86px;
-      padding: 11px 8px;
+    .level-box {
+      min-width: 72px;
+      padding: 7px 10px;
       border: 1px solid var(--line);
       border-radius: 8px;
-      background: rgba(245, 248, 242, 0.05);
+      background: rgba(17, 23, 19, 0.68);
+      text-align: center;
     }
 
-    .result span {
+    .level-label {
       display: block;
+      color: var(--muted);
+      font-size: 10px;
+    }
+
+    #level {
+      display: block;
+      margin-top: 3px;
+      font-size: 17px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .growth {
+      height: 5px;
+      overflow: hidden;
+      border-radius: 99px;
+      background: rgba(246, 247, 242, 0.12);
+    }
+
+    #growthBar {
+      width: 0%;
+      height: 100%;
+      border-radius: 99px;
+      background: var(--green);
+      transition: width 0.24s ease;
+    }
+
+    .status-panel {
+      padding: 11px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface-strong);
+      backdrop-filter: blur(12px);
+    }
+
+    .status-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 9px;
+    }
+
+    #mood {
+      font-size: 14px;
+      font-weight: 750;
+    }
+
+    .care-count {
+      color: var(--muted);
+      font-size: 11px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px 12px;
+    }
+
+    .status {
+      min-width: 0;
+    }
+
+    .status:nth-child(5) {
+      grid-column: 1 / -1;
+    }
+
+    .status-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 5px;
       color: var(--muted);
       font-size: 11px;
     }
 
-    .result strong {
-      display: block;
-      margin-top: 4px;
-      font-size: 20px;
+    .status-value {
+      color: var(--ink);
+      font-weight: 700;
       font-variant-numeric: tabular-nums;
     }
 
-    button {
+    .track {
+      height: 7px;
+      overflow: hidden;
+      border-radius: 99px;
+      background: rgba(246, 247, 242, 0.11);
+    }
+
+    .track i {
+      display: block;
       width: 100%;
-      min-height: 48px;
-      border: 0;
+      height: 100%;
+      border-radius: inherit;
+      transform-origin: left center;
+      transition: transform 0.2s ease;
+    }
+
+    #hungerBar { background: var(--amber); }
+    #thirstBar { background: var(--blue); }
+    #energyBar { background: #a78bfa; }
+    #happyBar { background: var(--pink); }
+    #cleanBar { background: var(--green); }
+
+    .stage {
+      position: relative;
+      display: grid;
+      place-items: center;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .stage::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: max(14px, env(safe-area-inset-bottom));
+      height: 32%;
+      border-top: 1px solid rgba(246, 247, 242, 0.06);
+      background: rgba(57, 217, 138, 0.05);
+    }
+
+    .dog {
+      position: relative;
+      width: min(76vw, 290px);
+      aspect-ratio: 1 / 0.92;
+      animation: idle 2.8s ease-in-out infinite;
+    }
+
+    .shadow {
+      position: absolute;
+      bottom: 3%;
+      left: 50%;
+      width: 58%;
+      height: 8%;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.28);
+      transform: translateX(-50%);
+      filter: blur(4px);
+    }
+
+    .tail {
+      position: absolute;
+      right: 13%;
+      bottom: 30%;
+      width: 15%;
+      height: 12%;
+      border: 9px solid #d9ddd6;
+      border-left-color: transparent;
+      border-radius: 50%;
+      transform: rotate(-18deg);
+      transform-origin: left bottom;
+      animation: wag 0.7s ease-in-out infinite alternate;
+    }
+
+    .body {
+      position: absolute;
+      bottom: 12%;
+      left: 50%;
+      width: 62%;
+      height: 36%;
+      border-radius: 48% 48% 46% 46%;
+      background: linear-gradient(180deg, #f0f2ec 0%, #dbdfd8 100%);
+      transform: translateX(-50%);
+      box-shadow: inset -8px -8px 0 rgba(0, 0, 0, 0.05);
+    }
+
+    .belly {
+      position: absolute;
+      left: 50%;
+      bottom: 8%;
+      width: 48%;
+      height: 52%;
+      border-radius: 50%;
+      background: #f8faf5;
+      transform: translateX(-50%);
+    }
+
+    .leg {
+      position: absolute;
+      bottom: 5%;
+      width: 15%;
+      height: 18%;
+      border-radius: 9px;
+      background: #e6e9e2;
+    }
+
+    .leg.front { left: 26%; }
+    .leg.back { right: 24%; }
+
+    .head {
+      position: absolute;
+      top: 2%;
+      left: 50%;
+      z-index: 2;
+      width: 51%;
+      aspect-ratio: 1;
+      border: 7px solid #e7eae3;
+      border-radius: 50%;
+      background: #f2f4ee;
+      transform: translateX(-50%);
+    }
+
+    .ear {
+      position: absolute;
+      top: -9%;
+      width: 20%;
+      height: 22%;
+      border-radius: 12px 12px 3px 12px;
+      background: #cfd4cb;
+    }
+
+    .ear.left {
+      left: 3%;
+      transform: rotate(-18deg);
+    }
+
+    .ear.right {
+      right: 3%;
+      border-radius: 12px 12px 12px 3px;
+      transform: rotate(18deg);
+    }
+
+    #petAvatar {
+      position: absolute;
+      inset: 5%;
+      width: 90%;
+      height: 90%;
+      border-radius: 50%;
+      object-fit: cover;
+      object-position: 50% 14%;
+      background: #282e29;
+    }
+
+    .collar {
+      position: absolute;
+      bottom: -4%;
+      left: 50%;
+      width: 48%;
+      height: 11%;
+      border-radius: 99px;
+      background: var(--pink);
+      transform: translateX(-50%);
+    }
+
+    .dog.sleeping {
+      animation-duration: 5s;
+      filter: brightness(0.88);
+    }
+
+    .dog.sleeping .tail {
+      animation-duration: 2.4s;
+    }
+
+    .dog.pop {
+      animation: pop 0.42s ease;
+    }
+
+    .float-effect {
+      position: absolute;
+      z-index: 4;
+      display: grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 50%;
+      background: rgba(17, 23, 19, 0.9);
+      animation: floatUp 0.9s ease forwards;
+      pointer-events: none;
+    }
+
+    .icon {
+      width: 20px;
+      height: 20px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .float-effect .icon {
+      width: 18px;
+      height: 18px;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 7px;
+    }
+
+    .action {
+      min-width: 0;
+      height: 62px;
+      padding: 6px 4px;
+      border: 1px solid var(--line);
       border-radius: 8px;
-      color: #06130c;
-      background: var(--green);
-      font-size: 16px;
-      font-weight: 750;
+      background: #1e2620;
+      color: var(--ink);
+      font: inherit;
+      display: grid;
+      grid-template-rows: 20px auto;
+      justify-items: center;
+      align-items: center;
+      gap: 4px;
       cursor: pointer;
     }
 
-    button:active {
+    .action span {
+      max-width: 100%;
+      overflow: hidden;
+      color: #dfe5dd;
+      font-size: 11px;
+      font-weight: 700;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .action:disabled {
+      opacity: 0.36;
+      cursor: not-allowed;
+    }
+
+    .action:not(:disabled):active {
       transform: translateY(1px);
-      filter: brightness(0.92);
+      background: #273028;
     }
 
-    #avatarPreview {
-      width: 82px;
-      height: 82px;
-      margin: 0 auto 16px;
-      border: 3px solid var(--green);
-      border-radius: 50%;
-      background: #222;
-      object-fit: cover;
-      box-shadow: 0 0 24px rgba(57, 217, 138, 0.26);
+    #sleepAction.active {
+      color: #06130c;
+      background: var(--green);
+      border-color: var(--green);
     }
 
-    @media (max-width: 360px) {
-      h1 {
-        font-size: 24px;
+    #sleepAction.active span {
+      color: #06130c;
+    }
+
+    @keyframes idle {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-8px) rotate(-1deg); }
+    }
+
+    @keyframes wag {
+      from { transform: rotate(-27deg); }
+      to { transform: rotate(5deg); }
+    }
+
+    @keyframes pop {
+      0% { transform: scale(1); }
+      35% { transform: scale(1.06); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes floatUp {
+      0% { opacity: 0; transform: translateY(6px) scale(0.7); }
+      22% { opacity: 1; transform: translateY(0) scale(1); }
+      100% { opacity: 0; transform: translateY(-72px) scale(0.94); }
+    }
+
+    @media (min-width: 700px) {
+      #app {
+        max-width: 720px;
+        margin: 0 auto;
+        padding-left: 24px;
+        padding-right: 24px;
       }
 
-      .metric {
-        min-width: 60px;
-        padding: 7px 8px;
+      .status-grid {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
       }
+
+      .status:nth-child(5) {
+        grid-column: auto;
+      }
+    }
+
+    @media (max-width: 350px) {
+      h1 { font-size: 21px; }
+      .action { height: 58px; }
     }
   </style>
 </head>
 <body>
   <main id="app">
-    <canvas id="stage"></canvas>
+    <svg width="0" height="0" aria-hidden="true">
+      <symbol id="icon-food" viewBox="0 0 24 24">
+        <path d="M4 13h16a8 8 0 0 1-8 7 8 8 0 0 1-8-7Z"></path>
+        <path d="M8 13V8"></path>
+        <path d="M16 13V8"></path>
+      </symbol>
+      <symbol id="icon-water" viewBox="0 0 24 24">
+        <path d="M12 21a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5S12.5 4.5 12 2c-.5 2.5-2 4.9-4 6.5S5 12 5 14a7 7 0 0 0 7 7Z"></path>
+      </symbol>
+      <symbol id="icon-moon" viewBox="0 0 24 24">
+        <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+      </symbol>
+      <symbol id="icon-ball" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="9"></circle>
+        <path d="M4 10h16"></path>
+        <path d="M12 3c3 3.2 3 14.8 0 18"></path>
+      </symbol>
+      <symbol id="icon-clean" viewBox="0 0 24 24">
+        <path d="M10 3l1.5 4L16 8.5 11.5 10 10 14 8.5 10 4 8.5 8.5 7 10 3Z"></path>
+        <path d="M18 14l.9 2.1L21 17l-2.1.9L18 20l-.9-2.1L15 17l2.1-.9L18 14Z"></path>
+      </symbol>
+    </svg>
 
-    <header class="hud">
-      <div class="metric">
-        <span class="metric-label">分数</span>
-        <span class="metric-value" id="scoreValue">0</span>
+    <header class="topbar">
+      <div class="title-block">
+        <p>虚拟宠物</p>
+        <h1>养殖杨志涛</h1>
       </div>
-      <div class="metric energy">
-        <span class="metric-label">护盾能量</span>
-        <span class="energy-track"><i id="energyBar"></i></span>
-      </div>
-      <div class="metric">
-        <span class="metric-label">防护</span>
-        <span class="metric-value" id="livesValue">3</span>
+      <div class="level-box">
+        <span class="level-label">成长</span>
+        <span id="level">1</span>
       </div>
     </header>
 
-    <div class="overlay" id="overlay">
-      <section class="panel">
-        <img id="avatarPreview" alt="杨志涛头像">
-        <p class="eyebrow" id="overlayEyebrow">非暴力反应挑战</p>
-        <h1 id="overlayTitle">杨志涛护盾大作战</h1>
-        <p class="description" id="overlayText">点击屏幕释放能量波，在乱流碰到护盾前把它们击碎。能量有限，重物需要两次拦截。</p>
-        <div class="result hidden" id="resultBox">
-          <div><span>本局</span><strong id="finalScore">0</strong></div>
-          <div><span>最高</span><strong id="bestScore">0</strong></div>
+    <div class="growth" aria-hidden="true"><i id="growthBar"></i></div>
+
+    <section class="status-panel" aria-label="宠物状态">
+      <div class="status-head">
+        <span id="mood">状态不错</span>
+        <span class="care-count" id="careCount">照顾 0 次</span>
+      </div>
+      <div class="status-grid">
+        <div class="status">
+          <div class="status-label"><span>饱食</span><span class="status-value" id="hungerValue">70</span></div>
+          <div class="track"><i id="hungerBar"></i></div>
         </div>
-        <button id="startButton" type="button">开始游戏</button>
-      </section>
-    </div>
+        <div class="status">
+          <div class="status-label"><span>饮水</span><span class="status-value" id="thirstValue">70</span></div>
+          <div class="track"><i id="thirstBar"></i></div>
+        </div>
+        <div class="status">
+          <div class="status-label"><span>精力</span><span class="status-value" id="energyValue">80</span></div>
+          <div class="track"><i id="energyBar"></i></div>
+        </div>
+        <div class="status">
+          <div class="status-label"><span>心情</span><span class="status-value" id="happyValue">75</span></div>
+          <div class="track"><i id="happyBar"></i></div>
+        </div>
+        <div class="status">
+          <div class="status-label"><span>清洁</span><span class="status-value" id="cleanValue">80</span></div>
+          <div class="track"><i id="cleanBar"></i></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="stage" aria-label="小狗杨志涛">
+      <div class="dog" id="dog">
+        <div class="shadow"></div>
+        <div class="tail"></div>
+        <div class="body"><div class="belly"></div></div>
+        <div class="leg front"></div>
+        <div class="leg back"></div>
+        <div class="head">
+          <div class="ear left"></div>
+          <div class="ear right"></div>
+          <img id="petAvatar" alt="杨志涛">
+          <div class="collar"></div>
+        </div>
+      </div>
+    </section>
+
+    <nav class="actions" aria-label="照顾操作">
+      <button class="action" id="foodAction" type="button">
+        <svg class="icon" aria-hidden="true"><use href="#icon-food"></use></svg><span>喂食</span>
+      </button>
+      <button class="action" id="waterAction" type="button">
+        <svg class="icon" aria-hidden="true"><use href="#icon-water"></use></svg><span>喂水</span>
+      </button>
+      <button class="action" id="playAction" type="button">
+        <svg class="icon" aria-hidden="true"><use href="#icon-ball"></use></svg><span>玩耍</span>
+      </button>
+      <button class="action" id="cleanAction" type="button">
+        <svg class="icon" aria-hidden="true"><use href="#icon-clean"></use></svg><span>清洁</span>
+      </button>
+      <button class="action" id="sleepAction" type="button">
+        <svg class="icon" aria-hidden="true"><use href="#icon-moon"></use></svg><span>睡觉</span>
+      </button>
+    </nav>
   </main>
 
   <script src="avatar.js"></script>
@@ -265,448 +577,179 @@
     (() => {
       "use strict";
 
-      const canvas = document.getElementById("stage");
-      const ctx = canvas.getContext("2d");
-      const scoreValue = document.getElementById("scoreValue");
-      const livesValue = document.getElementById("livesValue");
-      const energyBar = document.getElementById("energyBar");
-      const overlay = document.getElementById("overlay");
-      const overlayEyebrow = document.getElementById("overlayEyebrow");
-      const overlayTitle = document.getElementById("overlayTitle");
-      const overlayText = document.getElementById("overlayText");
-      const resultBox = document.getElementById("resultBox");
-      const finalScore = document.getElementById("finalScore");
-      const bestScore = document.getElementById("bestScore");
-      const startButton = document.getElementById("startButton");
-      const avatarPreview = document.getElementById("avatarPreview");
-      const avatar = new Image();
-
-      avatarPreview.src = AVATAR_SRC;
-      avatar.src = AVATAR_SRC;
-
-      let width = 0;
-      let height = 0;
-      let centerX = 0;
-      let centerY = 0;
-      let avatarRadius = 72;
-      let nextId = 1;
-      let lastTime = 0;
-
-      const state = {
-        running: false,
-        over: false,
-        score: 0,
-        lives: 3,
-        energy: 100,
-        time: 0,
-        spawnTimer: 0.9,
-        shake: 0,
-        hurt: 0,
-        shots: [],
-        waves: [],
-        sparks: [],
-        labels: []
+      const storageKey = "yang-zhitao-pet-v1";
+      const dog = document.getElementById("dog");
+      const petAvatar = document.getElementById("petAvatar");
+      const mood = document.getElementById("mood");
+      const careCount = document.getElementById("careCount");
+      const level = document.getElementById("level");
+      const growthBar = document.getElementById("growthBar");
+      const stage = document.querySelector(".stage");
+      const buttons = {
+        food: document.getElementById("foodAction"),
+        water: document.getElementById("waterAction"),
+        play: document.getElementById("playAction"),
+        clean: document.getElementById("cleanAction"),
+        sleep: document.getElementById("sleepAction")
       };
 
-      function bestKey() {
-        return "yang-zhitao-shield-best";
-      }
+      petAvatar.src = AVATAR_SRC;
 
-      function getBest() {
-        return Number(localStorage.getItem(bestKey()) || 0) || 0;
-      }
+      const defaultState = {
+        hunger: 70,
+        thirst: 70,
+        energy: 80,
+        happy: 75,
+        clean: 80,
+        xp: 0,
+        care: 0,
+        sleeping: false,
+        last: Date.now()
+      };
 
-      function setBest(value) {
-        localStorage.setItem(bestKey(), String(value));
-      }
+      let state = loadState();
+      let lastTime = performance.now();
+      let saveTimer = 0;
 
-      function resize() {
-        const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
-        width = canvas.clientWidth || window.innerWidth;
-        height = canvas.clientHeight || window.innerHeight;
-        canvas.width = Math.round(width * dpr);
-        canvas.height = Math.round(height * dpr);
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        centerX = width / 2;
-        centerY = height * 0.54;
-        avatarRadius = Math.max(64, Math.min(108, Math.min(width, height) * 0.18));
-      }
-
-      function reset() {
-        state.running = true;
-        state.over = false;
-        state.score = 0;
-        state.lives = 3;
-        state.energy = 100;
-        state.time = 0;
-        state.spawnTimer = 0.7;
-        state.shake = 0;
-        state.hurt = 0;
-        state.shots.length = 0;
-        state.waves.length = 0;
-        state.sparks.length = 0;
-        state.labels.length = 0;
-        scoreValue.textContent = "0";
-        livesValue.textContent = "3";
-        updateEnergy();
-      }
-
-      function showStart() {
-        overlayEyebrow.textContent = "非暴力反应挑战";
-        overlayTitle.textContent = "杨志涛护盾大作战";
-        overlayText.textContent = "点击屏幕释放能量波，在乱流碰到护盾前把它们击碎。能量有限，重物需要两次拦截。";
-        resultBox.classList.add("hidden");
-        startButton.textContent = "开始游戏";
-        overlay.classList.remove("hidden");
-      }
-
-      function showGameOver() {
-        state.running = false;
-        state.over = true;
-        const best = Math.max(getBest(), state.score);
-        setBest(best);
-        finalScore.textContent = state.score;
-        bestScore.textContent = best;
-        overlayEyebrow.textContent = "护盾耗尽";
-        overlayTitle.textContent = "守住了一阵";
-        overlayText.textContent = "乱流越来越密，下一次试着用更少能量完成更多拦截。";
-        resultBox.classList.remove("hidden");
-        startButton.textContent = "再来一局";
-        overlay.classList.remove("hidden");
-      }
-
-      function spawnShot() {
-        const side = Math.floor(Math.random() * 4);
-        const margin = 58;
-        const position = margin + Math.random() * (Math.min(width, height) - margin * 2);
-        let x = 0;
-        let y = 0;
-
-        if (side === 0) {
-          x = position;
-          y = -margin;
-        } else if (side === 1) {
-          x = width + margin;
-          y = position;
-        } else if (side === 2) {
-          x = position;
-          y = height + margin;
-        } else {
-          x = -margin;
-          y = position;
+      function loadState() {
+        try {
+          const saved = JSON.parse(localStorage.getItem(storageKey) || "");
+          const merged = { ...defaultState, ...saved };
+          const elapsed = Math.min(12 * 60 * 60, Math.max(0, (Date.now() - Number(merged.last || Date.now())) / 1000));
+          merged.hunger = clamp(merged.hunger - elapsed * 0.2, 4, 100);
+          merged.thirst = clamp(merged.thirst - elapsed * 0.26, 4, 100);
+          merged.clean = clamp(merged.clean - elapsed * 0.06, 4, 100);
+          merged.energy = clamp(merged.energy - elapsed * 0.11, 4, 100);
+          merged.happy = clamp(merged.happy - elapsed * 0.14, 4, 100);
+          merged.sleeping = false;
+          merged.last = Date.now();
+          return merged;
+        } catch (_) {
+          return { ...defaultState };
         }
+      }
 
-        const difficulty = Math.min(1, state.time / 58);
-        const roll = Math.random();
-        const heavy = roll < 0.1 + difficulty * 0.1;
-        const fast = !heavy && roll < 0.26 + difficulty * 0.16;
-        const angle = Math.atan2(centerY - y, centerX - x) + (Math.random() - 0.5) * 0.14;
-        const speed = heavy ? 84 + difficulty * 34 : fast ? 168 + difficulty * 92 : 112 + difficulty * 52;
+      function clamp(value, min = 0, max = 100) {
+        return Math.max(min, Math.min(max, value));
+      }
 
-        state.shots.push({
-          id: nextId++,
-          x,
-          y,
-          vx: Math.cos(angle) * speed,
-          vy: Math.sin(angle) * speed,
-          r: heavy ? 21 : fast ? 10 : 14,
-          hp: heavy ? 2 : 1,
-          heavy,
-          fast,
-          spin: Math.random() * Math.PI * 2,
-          born: state.time
+      function saveState() {
+        state.last = Date.now();
+        localStorage.setItem(storageKey, JSON.stringify(state));
+      }
+
+      function showFloat(iconId) {
+        const effect = document.createElement("div");
+        effect.className = "float-effect";
+        effect.style.left = `calc(50% + ${(Math.random() * 90 - 45).toFixed(0)}px)`;
+        effect.style.top = "24%";
+        effect.innerHTML = `<svg class="icon" aria-hidden="true"><use href="#${iconId}"></use></svg>`;
+        stage.appendChild(effect);
+        effect.addEventListener("animationend", () => effect.remove());
+      }
+
+      function popDog() {
+        dog.classList.remove("pop");
+        requestAnimationFrame(() => dog.classList.add("pop"));
+      }
+
+      function applyCare(changes, xp, iconId) {
+        if (state.sleeping) return;
+
+        Object.entries(changes).forEach(([key, value]) => {
+          state[key] = clamp(state[key] + value);
         });
+        state.xp += xp;
+        state.care += 1;
+        showFloat(iconId);
+        popDog();
+        render();
+        saveState();
       }
 
-      function makeWave(x, y) {
-        state.waves.push({
-          x,
-          y,
-          r: 12,
-          maxR: Math.max(165, Math.min(width, height) * 0.25),
-          life: 0,
-          maxLife: 0.34,
-          hits: new Set()
-        });
+      function getMood() {
+        if (state.sleeping) return "睡着了";
+        if (state.thirst < 20 && state.hunger < 20) return "需要照顾";
+        if (state.thirst < 20) return "口渴了";
+        if (state.hunger < 20) return "饿了";
+        if (state.clean < 22) return "要清洁";
+        if (state.energy < 18) return "困了";
+        if (state.happy < 25) return "想玩";
+        return "状态不错";
       }
 
-      function addSparks(x, y, color, count = 12, power = 190) {
-      for (let i = 0; i < count; i += 1) {
-          const angle = Math.random() * Math.PI * 2;
-          const speed = power * (0.35 + Math.random() * 0.65);
-          state.sparks.push({
-            x,
-            y,
-            vx: Math.cos(angle) * speed,
-            vy: Math.sin(angle) * speed,
-            life: 0.42,
-            maxLife: 0.42,
-            color,
-            size: 2 + Math.random() * 3
-          });
-        }
-      }
+      function render() {
+        const values = {
+          hunger: state.hunger,
+          thirst: state.thirst,
+          energy: state.energy,
+          happy: state.happy,
+          clean: state.clean
+        };
 
-      function addLabel(x, y, text, color) {
-        state.labels.push({ x, y, text, color, life: 0.55 });
-      }
-
-      function updateEnergy() {
-        energyBar.style.transform = `scaleX(${Math.max(0, state.energy) / 100})`;
-      }
-
-      function tap(x, y) {
-        if (!state.running || state.energy < 16) return;
-        state.energy -= 16;
-        updateEnergy();
-        makeWave(x, y);
-      }
-
-      function update(dt) {
-        state.time += dt;
-        state.energy = Math.min(100, state.energy + dt * 12);
-        updateEnergy();
-        state.shake = Math.max(0, state.shake - dt * 3.2);
-        state.hurt = Math.max(0, state.hurt - dt * 2.6);
-
-        state.spawnTimer -= dt;
-        if (state.spawnTimer <= 0) {
-          spawnShot();
-          state.spawnTimer = Math.max(0.2, 1.02 - state.time * 0.011) * (0.82 + Math.random() * 0.36);
-        }
-
-        for (let i = state.shots.length - 1; i >= 0; i -= 1) {
-          const shot = state.shots[i];
-          shot.x += shot.vx * dt;
-          shot.y += shot.vy * dt;
-          shot.spin += dt * (shot.fast ? 9 : 4);
-          const distance = Math.hypot(shot.x - centerX, shot.y - centerY);
-
-          if (distance < avatarRadius + shot.r - 6) {
-            state.shots.splice(i, 1);
-            state.lives -= 1;
-            livesValue.textContent = Math.max(0, state.lives);
-            state.shake = 1;
-            state.hurt = 1;
-            addSparks(shot.x, shot.y, shot.heavy ? "#f5b731" : "#ef5350", 18, 230);
-
-            if (state.lives <= 0) {
-              showGameOver();
-              return;
-            }
-          }
-        }
-
-        for (let i = state.waves.length - 1; i >= 0; i -= 1) {
-          const wave = state.waves[i];
-          wave.life += dt;
-          wave.r = wave.maxR * Math.min(1, wave.life / wave.maxLife);
-
-          for (let j = state.shots.length - 1; j >= 0; j -= 1) {
-            const shot = state.shots[j];
-            if (wave.hits.has(shot.id)) continue;
-
-            if (Math.hypot(shot.x - wave.x, shot.y - wave.y) < wave.r + shot.r) {
-              wave.hits.add(shot.id);
-              shot.hp -= 1;
-              shot.vx *= 0.42;
-              shot.vy *= 0.42;
-
-              if (shot.hp <= 0) {
-                const gained = shot.heavy ? 35 : shot.fast ? 18 : 10;
-                state.score += gained;
-                scoreValue.textContent = state.score;
-                state.energy = Math.min(100, state.energy + 5);
-                updateEnergy();
-                addSparks(shot.x, shot.y, shot.heavy ? "#f5b731" : "#39d98a", shot.heavy ? 20 : 12);
-                addLabel(shot.x, shot.y, `+${gained}`, shot.heavy ? "#f5b731" : "#39d98a");
-                state.shots.splice(j, 1);
-              }
-            }
-          }
-
-          if (wave.life >= wave.maxLife) {
-            state.waves.splice(i, 1);
-          }
-        }
-
-        for (let i = state.sparks.length - 1; i >= 0; i -= 1) {
-          const spark = state.sparks[i];
-          spark.life -= dt;
-          spark.x += spark.vx * dt;
-          spark.y += spark.vy * dt;
-          spark.vx *= 0.92;
-          spark.vy *= 0.92;
-          if (spark.life <= 0) state.sparks.splice(i, 1);
-        }
-
-        for (let i = state.labels.length - 1; i >= 0; i -= 1) {
-          const label = state.labels[i];
-          label.life -= dt;
-          label.y -= dt * 48;
-          if (label.life <= 0) state.labels.splice(i, 1);
-        }
-      }
-
-      function drawAvatar() {
-        const shakeX = state.shake ? (Math.random() - 0.5) * state.shake * 12 : 0;
-        const shakeY = state.shake ? (Math.random() - 0.5) * state.shake * 12 : 0;
-
-        ctx.save();
-        ctx.translate(centerX + shakeX, centerY + shakeY);
-        ctx.beginPath();
-        ctx.arc(0, 0, avatarRadius, 0, Math.PI * 2);
-        ctx.closePath();
-        ctx.save();
-        ctx.clip();
-        ctx.fillStyle = "#222826";
-        ctx.fillRect(-avatarRadius, -avatarRadius, avatarRadius * 2, avatarRadius * 2);
-
-        if (avatar.complete && avatar.naturalWidth > 0) {
-          const sourceSize = avatar.naturalWidth;
-          const sourceY = Math.max(0, avatar.naturalHeight * 0.055);
-          ctx.drawImage(avatar, 0, sourceY, sourceSize, sourceSize, -avatarRadius, -avatarRadius, avatarRadius * 2, avatarRadius * 2);
-        }
-
-        if (state.hurt > 0) {
-          ctx.fillStyle = `rgba(239, 83, 80, ${state.hurt * 0.28})`;
-          ctx.fillRect(-avatarRadius, -avatarRadius, avatarRadius * 2, avatarRadius * 2);
-        }
-        ctx.restore();
-
-        ctx.lineWidth = 5;
-        ctx.strokeStyle = state.hurt > 0.25 ? "#ef5350" : "#39d98a";
-        ctx.stroke();
-        ctx.globalAlpha = 0.3 + state.energy / 280;
-        ctx.lineWidth = 9;
-        ctx.strokeStyle = "#39d98a";
-        ctx.beginPath();
-        ctx.arc(0, 0, avatarRadius + 12, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.restore();
-      }
-
-      function drawShot(shot) {
-        ctx.save();
-        ctx.translate(shot.x, shot.y);
-        ctx.rotate(shot.spin);
-        const color = shot.heavy ? "#f5b731" : shot.fast ? "#ef5350" : "#d66ff0";
-        ctx.fillStyle = color;
-        ctx.beginPath();
-
-        if (shot.heavy) {
-          ctx.rect(-shot.r, -shot.r, shot.r * 2, shot.r * 2);
-        } else {
-          const sides = shot.fast ? 3 : 6;
-          for (let i = 0; i < sides; i += 1) {
-            const angle = (i / sides) * Math.PI * 2;
-            const x = Math.cos(angle) * shot.r;
-            const y = Math.sin(angle) * shot.r;
-            if (i === 0) ctx.moveTo(x, y);
-            else ctx.lineTo(x, y);
-          }
-        }
-
-        ctx.closePath();
-        ctx.fill();
-        ctx.globalAlpha = 0.42;
-        ctx.fillStyle = "#fff";
-        ctx.beginPath();
-        ctx.arc(-shot.r * 0.24, -shot.r * 0.24, shot.r * 0.24, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-      }
-
-      function draw() {
-        ctx.clearRect(0, 0, width, height);
-        const gradient = ctx.createRadialGradient(centerX, centerY, avatarRadius * 0.5, centerX, centerY, Math.max(width, height));
-        gradient.addColorStop(0, "rgba(57, 217, 138, 0.08)");
-        gradient.addColorStop(0.45, "rgba(16, 20, 19, 0.94)");
-        gradient.addColorStop(1, "#080b09");
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, width, height);
-
-        ctx.strokeStyle = "rgba(245, 248, 242, 0.05)";
-        ctx.lineWidth = 1;
-        for (let x = 30; x < width; x += 48) {
-          ctx.beginPath();
-          ctx.moveTo(x, 0);
-          ctx.lineTo(x, height);
-          ctx.stroke();
-        }
-        for (let y = 30; y < height; y += 48) {
-          ctx.beginPath();
-          ctx.moveTo(0, y);
-          ctx.lineTo(width, y);
-          ctx.stroke();
-        }
-
-        drawAvatar();
-
-        state.waves.forEach((wave) => {
-          const alpha = 1 - wave.life / wave.maxLife;
-          ctx.strokeStyle = `rgba(57, 217, 138, ${alpha * 0.9})`;
-          ctx.lineWidth = 8 * alpha + 1;
-          ctx.beginPath();
-          ctx.arc(wave.x, wave.y, wave.r, 0, Math.PI * 2);
-          ctx.stroke();
+        Object.entries(values).forEach(([key, value]) => {
+          const rounded = Math.round(value);
+          document.getElementById(`${key}Bar`).style.transform = `scaleX(${value / 100})`;
+          document.getElementById(`${key}Value`).textContent = rounded;
         });
 
-        state.shots.forEach(drawShot);
+        const currentLevel = 1 + Math.floor(state.xp / 90);
+        level.textContent = currentLevel;
+        growthBar.style.width = `${((state.xp % 90) / 90) * 100}%`;
+        mood.textContent = getMood();
+        careCount.textContent = `照顾 ${state.care} 次`;
 
-        state.sparks.forEach((spark) => {
-          ctx.globalAlpha = Math.max(0, spark.life / spark.maxLife);
-          ctx.fillStyle = spark.color;
-          ctx.beginPath();
-          ctx.arc(spark.x, spark.y, spark.size, 0, Math.PI * 2);
-          ctx.fill();
-        });
-        ctx.globalAlpha = 1;
+        dog.classList.toggle("sleeping", state.sleeping);
+        buttons.sleep.classList.toggle("active", state.sleeping);
+        buttons.sleep.querySelector("span").textContent = state.sleeping ? "醒来" : "睡觉";
 
-        ctx.font = "700 16px -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif";
-        ctx.textAlign = "center";
-        state.labels.forEach((label) => {
-          ctx.globalAlpha = Math.max(0, label.life / 0.55);
-          ctx.fillStyle = label.color;
-          ctx.fillText(label.text, label.x, label.y);
-        });
-        ctx.globalAlpha = 1;
+        const resting = state.sleeping;
+        buttons.food.disabled = resting || state.hunger > 98;
+        buttons.water.disabled = resting || state.thirst > 98;
+        buttons.play.disabled = resting || state.energy < 10;
+        buttons.clean.disabled = resting || state.clean > 98;
       }
 
-      function loop(time) {
-        requestAnimationFrame(loop);
-        const dt = Math.min(0.033, (time - lastTime) / 1000 || 0.016);
-        lastTime = time;
+      function update(now) {
+        requestAnimationFrame(update);
+        const dt = Math.min(0.1, (now - lastTime) / 1000);
+        lastTime = now;
 
-        if (state.running) update(dt);
-        else {
-          state.shake = Math.max(0, state.shake - dt * 3);
-          state.hurt = Math.max(0, state.hurt - dt * 2);
+        state.hunger = clamp(state.hunger - dt * (state.sleeping ? 0.32 : 0.78));
+        state.thirst = clamp(state.thirst - dt * (state.sleeping ? 0.38 : 0.94));
+        state.clean = clamp(state.clean - dt * (state.sleeping ? 0.04 : 0.21));
+        state.happy = clamp(state.happy - dt * (state.sleeping ? 0.08 : 0.5));
+        state.energy = clamp(state.energy + dt * (state.sleeping ? 9 : -0.48));
+
+        if (state.hunger < 12 || state.thirst < 12) {
+          state.happy = clamp(state.happy - dt * 0.8);
         }
-        draw();
+
+        saveTimer += dt;
+        if (saveTimer > 4) {
+          saveTimer = 0;
+          saveState();
+        }
+        render();
       }
 
-      startButton.addEventListener("click", () => {
-        overlay.classList.add("hidden");
-        reset();
-      });
-
-      canvas.addEventListener("pointerdown", (event) => {
-        const rect = canvas.getBoundingClientRect();
-        tap(event.clientX - rect.left, event.clientY - rect.top);
+      buttons.food.addEventListener("click", () => applyCare({ hunger: 24, thirst: -3, happy: 4, energy: 2 }, 12, "icon-food"));
+      buttons.water.addEventListener("click", () => applyCare({ thirst: 25, happy: 3 }, 9, "icon-water"));
+      buttons.play.addEventListener("click", () => applyCare({ happy: 16, energy: -10, thirst: -5, hunger: -3 }, 10, "icon-ball"));
+      buttons.clean.addEventListener("click", () => applyCare({ clean: 35, happy: 2 }, 7, "icon-clean"));
+      buttons.sleep.addEventListener("click", () => {
+        state.sleeping = !state.sleeping;
+        if (!state.sleeping) state.last = Date.now();
+        render();
+        saveState();
       });
 
       document.addEventListener("gesturestart", (event) => event.preventDefault());
-      window.addEventListener("resize", resize);
-      window.addEventListener("orientationchange", () => setTimeout(resize, 80));
+      window.addEventListener("beforeunload", saveState);
+      window.addEventListener("pagehide", saveState);
 
-      bestScore.textContent = getBest();
-      resize();
-      showStart();
-      requestAnimationFrame((time) => {
-        lastTime = time;
-        requestAnimationFrame(loop);
-      });
+      render();
+      requestAnimationFrame(update);
     })();
   </script>
 </body>
